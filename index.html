@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>✦ Magical Library ✨</title>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&family=Dancing+Script:wght@700&family=Noto+Sans+JP:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 :root {
   --bg:         #FFF5F8;
@@ -142,7 +141,6 @@ main{
   box-shadow:0 4px 16px rgba(200,125,232,0.2);
   flex-shrink:0;
   filter:drop-shadow(0 4px 8px rgba(200,125,232,0.3));
-  animation:floatAvatar 3.5s ease-in-out infinite;
 }
 @keyframes floatAvatar{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
 .child-name-big{font-weight:900;font-size:20px;color:white;text-shadow:0 1px 8px rgba(200,125,232,0.4);}
@@ -557,22 +555,6 @@ main{
   margin-bottom:2px;
 }
 .auth-sub{font-size:13px;color:var(--text-lt);margin-top:-6px;}
-.auth-tabs{
-  display:flex;gap:6px;
-  background:rgba(200,125,232,0.08);
-  border-radius:999px;padding:4px;
-}
-.auth-tab{
-  flex:1;padding:7px;border:none;cursor:pointer;
-  border-radius:999px;font-size:13px;font-weight:700;
-  background:transparent;color:var(--text-lt);
-  transition:all 0.2s;
-}
-.auth-tab.active{
-  background:white;
-  color:var(--text);
-  box-shadow:0 2px 8px rgba(200,125,232,0.2);
-}
 .auth-input{
   width:100%;box-sizing:border-box;
   padding:12px 16px;border-radius:14px;
@@ -610,23 +592,6 @@ main{
 </head>
 <body>
 
-<!-- ===== AUTH OVERLAY ===== -->
-<div id="authOverlay" class="full-overlay">
-  <div id="authLoading" style="display:none;text-align:center;padding:40px;font-size:18px;color:#7c4daa">✨ よみこんでいるよ...</div>
-  <div class="auth-card" id="authFormCard">
-    <div class="auth-logo">✦ Magical Library ✦</div>
-    <p class="auth-sub">まほうの図書館へようこそ ✨</p>
-    <div class="auth-tabs">
-      <button id="tabLogin"  class="auth-tab active" onclick="showAuthTab('login')">ログイン</button>
-      <button id="tabSignup" class="auth-tab"        onclick="showAuthTab('signup')">新規登録</button>
-    </div>
-    <input class="auth-input" id="authEmail"    type="email"    placeholder="メールアドレス" autocomplete="email">
-    <input class="auth-input" id="authPassword" type="password" placeholder="パスワード（6文字以上）" autocomplete="current-password">
-    <div id="authError" class="auth-error"></div>
-    <button class="btn-auth" id="authSubmitBtn" onclick="handleAuth()">ログイン</button>
-  </div>
-</div>
-
 <!-- ===== CHILD SETUP OVERLAY ===== -->
 <div id="childSetupOverlay" class="full-overlay" style="display:none">
   <div class="auth-card">
@@ -646,11 +611,7 @@ main{
   <div class="nav-inner">
     <a href="#" class="nav-logo">✦ Magical Library ✦</a>
     <div class="nav-right">
-      <div class="child-switcher" onclick="switchChild()">
-        <div class="child-switcher-avatar" id="switcherAvatar">🌸</div>
-        <div class="child-switcher-name" id="switcherName">はなちゃん</div>
-      </div>
-      <button class="nav-btn" title="設定">⚙️</button>
+      <button class="nav-btn" title="設定"><img src="assets/setting/setting.png" style="width:50px;height:50px;object-fit:contain;"></button>
     </div>
   </div>
 </nav>
@@ -785,16 +746,13 @@ main{
 </div>
 
 <script>
-// ===== SUPABASE =====
-const SUPABASE_URL = 'https://zwhsxwhlgprfyucfzpft.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp3aHN4d2hsZ3ByZnl1Y2Z6cGZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzOTM3NDQsImV4cCI6MjA4ODk2OTc0NH0.DLnvP0sb5l680HCY-ZL-sj9xf-H0ytKAsZLsOod7jaU';
-const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    lock: async (name, acquireTimeout, fn) => fn()
-  }
-});
+// ===== STORAGE =====
+const STORAGE_KEY = 'ml_data';
+function loadStorage() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { children: [], books: {} }; }
+  catch { return { children: [], books: {} }; }
+}
+function saveStorage(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
 
 const STAMP_STAR = "assets/stamps/star.png";
 const BOOK_IMGS = [
@@ -805,7 +763,6 @@ const BOOK_GOAL = 5;
 const AVATARS = ['🌸','🌟','🐰','🦄','🌈','🍀','🦋','🌙','🎀','⭐','🚀','🐻','😺','🐶','🚗'];
 
 // ===== STATE =====
-let currentUser = null;
 let currentChild = null;
 let allChildren = [];
 let books = [];
@@ -820,49 +777,6 @@ function getTotalBooks()   { return currentChild ? currentChild.total_books : 0;
 function getProgress()     { return getTotalBooks() % BOOK_GOAL; }
 function getStampCount()   { return currentChild ? currentChild.stamp_count : 0; }
 function getStampProgress(){ return getStampCount() % STAMP_GOAL; }
-
-// ===== AUTH UI =====
-function showAuthLoading() {
-  document.getElementById('authFormCard').style.display = 'none';
-  document.getElementById('authLoading').style.display = 'block';
-  document.getElementById('authOverlay').style.display = 'flex';
-}
-function showAuthForm() {
-  document.getElementById('authLoading').style.display = 'none';
-  document.getElementById('authFormCard').style.display = '';
-  document.getElementById('authOverlay').style.display = 'flex';
-}
-function hideAuthOverlay() {
-  document.getElementById('authOverlay').style.display = 'none';
-}
-
-let authMode = 'login';
-function showAuthTab(mode) {
-  authMode = mode;
-  document.getElementById('tabLogin').classList.toggle('active', mode==='login');
-  document.getElementById('tabSignup').classList.toggle('active', mode==='signup');
-  document.getElementById('authSubmitBtn').textContent = mode==='login' ? 'ログイン' : '新規登録';
-  document.getElementById('authError').textContent = '';
-}
-async function handleAuth() {
-  const email = document.getElementById('authEmail').value.trim();
-  const pass  = document.getElementById('authPassword').value;
-  const errEl = document.getElementById('authError');
-  errEl.textContent = '';
-  if (!email || !pass) { errEl.textContent = 'メールとパスワードを入力してください'; return; }
-  const btn = document.getElementById('authSubmitBtn');
-  btn.textContent = '…'; btn.disabled = true;
-  const { error } = authMode === 'login'
-    ? await _sb.auth.signInWithPassword({ email, password: pass })
-    : await _sb.auth.signUp({ email, password: pass });
-  btn.disabled = false;
-  btn.textContent = authMode === 'login' ? 'ログイン' : '新規登録';
-  if (error) { errEl.textContent = error.message; return; }
-  if (authMode === 'signup') errEl.style.color = '#0a8'; errEl.textContent = authMode === 'signup' ? '登録しました！メールを確認してください ✉️' : '';
-}
-async function signOut() {
-  await _sb.auth.signOut();
-}
 
 // ===== CHILD SETUP =====
 function initAvatarPicker() {
@@ -880,36 +794,48 @@ function initAvatarPicker() {
     picker.appendChild(el);
   });
 }
-async function createChild() {
+function createChild() {
   const name = document.getElementById('childNameInput').value.trim();
   const errEl = document.getElementById('childSetupError');
   if (!name) { errEl.textContent = 'なまえを入力してください'; return; }
-  const { data, error } = await _sb
-    .from('children')
-    .insert({ user_id: currentUser.id, name, avatar_emoji: selectedAvatar })
-    .select().single();
-  if (error) { errEl.textContent = error.message; return; }
+  const child = {
+    id: Date.now().toString(),
+    name,
+    avatar_emoji: selectedAvatar,
+    total_books: 0,
+    stamp_count: 0,
+    stamp_goal: 5,
+    reward_memo: 'アイス！',
+    current_streak: 0,
+    longest_streak: 0,
+    last_read_date: null,
+  };
+  const storage = loadStorage();
+  storage.children.push(child);
+  storage.books[child.id] = [];
+  saveStorage(storage);
   document.getElementById('childSetupOverlay').style.display = 'none';
-  await loadChild(data);
+  allChildren = storage.children;
+  loadChild(child);
 }
 
 // ===== LOAD DATA =====
-async function loadChildren() {
-  const { data } = await _sb.from('children').select('*').order('created_at');
-  allChildren = data || [];
+function loadChildren() {
+  const storage = loadStorage();
+  allChildren = storage.children || [];
   if (!allChildren.length) {
     initAvatarPicker();
     document.getElementById('childSetupOverlay').style.display = 'flex';
   } else {
-    await loadChild(allChildren[0]);
+    loadChild(allChildren[0]);
   }
 }
-async function loadChild(child) {
+function loadChild(child) {
   currentChild = child;
   STAMP_GOAL  = child.stamp_goal  || 5;
   REWARD_MEMO = child.reward_memo || '';
-  const { data } = await _sb.from('books').select('*').eq('child_id', child.id).order('created_at');
-  books = data || [];
+  const storage = loadStorage();
+  books = storage.books[child.id] || [];
   renderChildInfo();
   renderAll();
 }
@@ -920,8 +846,6 @@ function renderChildInfo() {
   document.getElementById('heroAvatar').textContent     = c.avatar_emoji;
   document.getElementById('heroName').textContent       = c.name;
   document.getElementById('heroTitle').textContent      = title;
-  document.getElementById('switcherAvatar').textContent = c.avatar_emoji;
-  document.getElementById('switcherName').textContent   = c.name;
   document.getElementById('currentStreakNum').innerHTML = `${c.current_streak}<span>にち</span>`;
   document.getElementById('longestStreakNum').innerHTML = `${c.longest_streak}<span>にち</span>`;
 }
@@ -932,10 +856,10 @@ function getTitle(total) {
   if (total >= 5)  return '⭐ レベル2 ／ ほしよみ師';
   return '⭐ レベル1 ／ よみはじめ';
 }
-async function switchChild() {
+function switchChild() {
   if (allChildren.length < 2) return;
   const idx = allChildren.findIndex(c => c.id === currentChild.id);
-  await loadChild(allChildren[(idx + 1) % allChildren.length]);
+  loadChild(allChildren[(idx + 1) % allChildren.length]);
 }
 
 // ===== RENDER: BOOK TRACK =====
@@ -1082,52 +1006,50 @@ function updateStars() {
 }
 
 // ===== SUBMIT =====
-async function submitBook() {
+function submitBook() {
   const title = document.getElementById('inputTitle').value.trim();
   if (!title) { document.getElementById('inputTitle').focus(); return; }
   const author     = document.getElementById('inputAuthor').value.trim();
   const impression = document.getElementById('inputImpression').value.trim();
   const rating     = currentRating || 3;
   const prevStamps = getStampCount();
+  const storage = loadStorage();
 
   if (editingId) {
-    const { data, error } = await _sb.from('books')
-      .update({ title, author, impression, rating, updated_at: new Date().toISOString() })
-      .eq('id', editingId).select().single();
-    if (!error) books = books.map(b => b.id === editingId ? data : b);
+    const idx = books.findIndex(b => b.id === editingId);
+    if (idx !== -1) books[idx] = { ...books[idx], title, author, impression, rating };
+    storage.books[currentChild.id] = books;
+    saveStorage(storage);
   } else {
-    const { data, error } = await _sb.from('books')
-      .insert({ child_id: currentChild.id, title, author, impression, rating })
-      .select().single();
-    if (!error) {
-      books.push(data);
-      await updateChildStats(prevStamps);
-    }
+    const book = { id: Date.now().toString(), child_id: currentChild.id, title, author, impression, rating };
+    books.push(book);
+    storage.books[currentChild.id] = books;
+    saveStorage(storage);
+    updateChildStats(prevStamps, storage);
   }
   closeModal();
   renderAll();
 }
 
-async function updateChildStats(prevStamps) {
+function updateChildStats(prevStamps, storage) {
   const total      = books.length;
   const newStamps  = Math.floor(total / BOOK_GOAL);
   const today      = new Date().toISOString().slice(0,10);
   const last       = currentChild.last_read_date;
   const yesterday  = new Date(Date.now()-86400000).toISOString().slice(0,10);
   let streak = currentChild.current_streak;
-  if (last === today)      { /* same day, no change */ }
+  if (last === today)          { /* same day, no change */ }
   else if (last === yesterday) { streak += 1; }
   else                         { streak = 1; }
   const longest = Math.max(streak, currentChild.longest_streak);
-  const { data } = await _sb.from('children')
-    .update({ total_books: total, stamp_count: newStamps, current_streak: streak, longest_streak: longest, last_read_date: today })
-    .eq('id', currentChild.id).select().single();
-  if (data) {
-    currentChild = data;
-    STAMP_GOAL   = data.stamp_goal  || 5;
-    REWARD_MEMO  = data.reward_memo || '';
-    renderChildInfo();
-  }
+  currentChild = { ...currentChild, total_books: total, stamp_count: newStamps, current_streak: streak, longest_streak: longest, last_read_date: today };
+  STAMP_GOAL  = currentChild.stamp_goal  || 5;
+  REWARD_MEMO = currentChild.reward_memo || '';
+  const childIdx = storage.children.findIndex(c => c.id === currentChild.id);
+  if (childIdx !== -1) storage.children[childIdx] = currentChild;
+  allChildren = storage.children;
+  saveStorage(storage);
+  renderChildInfo();
   if (newStamps > prevStamps) {
     setTimeout(() => showStampGet(newStamps), 400);
   }
@@ -1219,35 +1141,7 @@ const obs = new IntersectionObserver(entries => {
 document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 
 // ===== INIT =====
-let sessionHandled = false;
-
-_sb.auth.onAuthStateChange(async (event, session) => {
-  if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session?.user) {
-    if (sessionHandled) return;
-    sessionHandled = true;
-    currentUser = session.user;
-    showAuthLoading();
-    await loadChildren();
-    hideAuthOverlay();
-  } else if (event === 'SIGNED_OUT') {
-    sessionHandled = false;
-    currentUser = null; currentChild = null; books = [];
-    showAuthForm();
-    document.getElementById('childSetupOverlay').style.display = 'none';
-  }
-});
-
-// リロード時: getSession でも確実に復元
-(async () => {
-  const { data: { session } } = await _sb.auth.getSession();
-  if (session?.user && !sessionHandled) {
-    sessionHandled = true;
-    currentUser = session.user;
-    showAuthLoading();
-    await loadChildren();
-    hideAuthOverlay();
-  }
-})();
+loadChildren();
 </script>
 </body>
 </html>
