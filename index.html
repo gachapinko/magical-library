@@ -181,7 +181,7 @@ main{
   transition:transform 0.35s var(--ease-spring),filter 0.3s ease;
 }
 .book-img-wrap img{
-  width:100%;height:100%;object-fit:contain;
+  width:110%;height:110%;object-fit:contain;
   transition:inherit;
   user-select:none;pointer-events:none;
 }
@@ -208,12 +208,6 @@ main{
   filter:grayscale(0.85) brightness(0.55) opacity(0.5);
 }
 
-.book-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.3);}
-.book-dot.done{background:white;}
-.book-dot.current{background:white;animation:currentPulse 1.5s infinite;}
-@keyframes currentPulse{
-  0%,100%{opacity:1;} 50%{opacity:0.4;}
-}
 
 /* ゴールメッセージ */
 .goal-msg{
@@ -748,9 +742,7 @@ function renderTrack() {
     img.src = BOOK_IMGS[i];
     img.alt = `まほうの本 ${i+1}`;
     wrap.appendChild(img);
-    const dot = document.createElement('div');
-    dot.className = 'book-dot' + (done ? ' done' : cur ? ' current' : '');
-    slot.append(wrap, dot);
+    slot.append(wrap);
     track.appendChild(slot);
   }
   const remain = BOOK_GOAL - prog;
