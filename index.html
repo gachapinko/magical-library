@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>✦ Magical Library ✨</title>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&family=Dancing+Script:wght@700&family=Noto+Sans+JP:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 :root {
   --bg:         #FFF5F8;
@@ -530,9 +531,112 @@ main{
   color:var(--text-lt);font-size:14px;line-height:1.8;
 }
 .empty-state .empty-emoji{font-size:48px;display:block;margin-bottom:12px;animation:floatAvatar 3s ease-in-out infinite;}
+
+/* ===== AUTH / CHILD SETUP OVERLAY ===== */
+.full-overlay{
+  position:fixed;inset:0;z-index:2000;
+  background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  padding:24px;
+}
+.auth-card{
+  width:100%;max-width:360px;
+  background:rgba(255,255,255,0.9);
+  border-radius:28px;
+  border:2px solid rgba(255,255,255,0.95);
+  box-shadow:0 8px 32px rgba(200,125,232,0.18);
+  padding:32px 28px;
+  display:flex;flex-direction:column;gap:14px;
+  text-align:center;
+}
+.auth-logo{
+  font-family:'Dancing Script',cursive;
+  font-size:24px;
+  background:var(--grad-main);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:2px;
+}
+.auth-sub{font-size:13px;color:var(--text-lt);margin-top:-6px;}
+.auth-tabs{
+  display:flex;gap:6px;
+  background:rgba(200,125,232,0.08);
+  border-radius:999px;padding:4px;
+}
+.auth-tab{
+  flex:1;padding:7px;border:none;cursor:pointer;
+  border-radius:999px;font-size:13px;font-weight:700;
+  background:transparent;color:var(--text-lt);
+  transition:all 0.2s;
+}
+.auth-tab.active{
+  background:white;
+  color:var(--text);
+  box-shadow:0 2px 8px rgba(200,125,232,0.2);
+}
+.auth-input{
+  width:100%;box-sizing:border-box;
+  padding:12px 16px;border-radius:14px;
+  border:2px solid rgba(200,125,232,0.2);
+  font-size:14px;font-family:inherit;
+  background:rgba(255,255,255,0.8);
+  outline:none;transition:border 0.2s;
+}
+.auth-input:focus{border-color:var(--accent);}
+.btn-auth{
+  width:100%;padding:14px;border:none;cursor:pointer;
+  border-radius:999px;font-size:15px;font-weight:900;
+  font-family:inherit;
+  background:var(--grad-main);color:white;
+  box-shadow:0 4px 0 rgba(200,125,232,0.35);
+  transition:transform 0.15s,box-shadow 0.15s;
+}
+.btn-auth:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(200,125,232,0.35);}
+.auth-error{font-size:12px;color:#e05;min-height:16px;}
+.avatar-picker{
+  display:flex;flex-wrap:wrap;gap:8px;justify-content:center;
+}
+.avatar-opt{
+  font-size:26px;cursor:pointer;width:44px;height:44px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:50%;border:2px solid transparent;
+  transition:all 0.15s;
+}
+.avatar-opt.selected{
+  border-color:var(--accent);
+  background:rgba(200,125,232,0.12);
+  transform:scale(1.15);
+}
 </style>
 </head>
 <body>
+
+<!-- ===== AUTH OVERLAY ===== -->
+<div id="authOverlay" class="full-overlay">
+  <div class="auth-card">
+    <div class="auth-logo">✦ Magical Library ✦</div>
+    <p class="auth-sub">まほうの図書館へようこそ ✨</p>
+    <div class="auth-tabs">
+      <button id="tabLogin"  class="auth-tab active" onclick="showAuthTab('login')">ログイン</button>
+      <button id="tabSignup" class="auth-tab"        onclick="showAuthTab('signup')">新規登録</button>
+    </div>
+    <input class="auth-input" id="authEmail"    type="email"    placeholder="メールアドレス" autocomplete="email">
+    <input class="auth-input" id="authPassword" type="password" placeholder="パスワード（6文字以上）" autocomplete="current-password">
+    <div id="authError" class="auth-error"></div>
+    <button class="btn-auth" id="authSubmitBtn" onclick="handleAuth()">ログイン</button>
+  </div>
+</div>
+
+<!-- ===== CHILD SETUP OVERLAY ===== -->
+<div id="childSetupOverlay" class="full-overlay" style="display:none">
+  <div class="auth-card">
+    <div class="auth-logo">✦ はじめまして！ ✦</div>
+    <p class="auth-sub">お子さんのなまえを教えてね 🌸</p>
+    <input class="auth-input" id="childNameInput" type="text" placeholder="例：はなちゃん" maxlength="10">
+    <div class="avatar-picker" id="avatarPicker"></div>
+    <div id="childSetupError" class="auth-error"></div>
+    <button class="btn-auth" onclick="createChild()">はじめる！ ✨</button>
+  </div>
+</div>
 
 <div class="particles" id="particles"></div>
 
@@ -588,12 +692,12 @@ main{
   <div class="streak-row reveal" style="transition-delay:0.12s">
     <div class="streak-card">
       <img class="streak-emoji" src="assets/badge/1.PNG" alt="">
-      <div class="streak-num">5<span>にち</span></div>
+      <div class="streak-num" id="currentStreakNum">0<span>にち</span></div>
       <div class="streak-label">れんぞくきろく</div>
     </div>
     <div class="streak-card">
       <img class="streak-emoji" src="assets/badge/2.PNG" alt="">
-      <div class="streak-num">12<span>にち</span></div>
+      <div class="streak-num" id="longestStreakNum">0<span>にち</span></div>
       <div class="streak-label">さいこうきろく</div>
     </div>
     <div class="streak-card">
@@ -681,50 +785,143 @@ main{
 </div>
 
 <script>
-const STAMP_STAR = "assets/stamps/star.png";
+// ===== SUPABASE =====
+const SUPABASE_URL = 'https://zwhsxwhlgprfyucfzpft.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp3aHN4d2hsZ3ByZnl1Y2Z6cGZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzOTM3NDQsImV4cCI6MjA4ODk2OTc0NH0.DLnvP0sb5l680HCY-ZL-sj9xf-H0ytKAsZLsOod7jaU';
+const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    lock: async (name, acquireTimeout, fn) => fn()
+  }
+});
 
+const STAMP_STAR = "assets/stamps/star.png";
 const BOOK_IMGS = [
-  "assets/books/book1.png",
-  "assets/books/book2.png",
-  "assets/books/book3.png",
-  "assets/books/book4.png",
-  "assets/books/book5.png",
+  "assets/books/book1.png","assets/books/book2.png","assets/books/book3.png",
+  "assets/books/book4.png","assets/books/book5.png",
 ];
+const BOOK_GOAL = 5;
+const AVATARS = ['🌸','🌟','🐰','🦄','🌈','🍀','🦋','🌙','🎀','⭐','🚀','🐻'];
 
 // ===== STATE =====
-const BOOK_GOAL = 5;
-const STAMP_GOAL = 5; // 親設定（デモ値）
-const REWARD_MEMO = 'スタンプ1個でお菓子';
-
-const BOOK_PALETTES = [
-  {bg:'#fce4f0',spine:'#f090c0'},{bg:'#e4eaff',spine:'#90a8f0'},
-  {bg:'#e4f8f0',spine:'#70c8a8'},{bg:'#fff6d8',spine:'#e8c040'},
-  {bg:'#f0e4ff',spine:'#b878e8'},{bg:'#e4f4ff',spine:'#70b8f0'},
-];
-const BOOK_EMOJIS = ['🌸','🌟','🐰','🦄','🌈','🍀','🦋','🌙','🎀','⭐'];
-
-let books = [
-  {id:1,title:'ぐりとぐら',author:'なかがわりえこ',impression:'たまごでケーキを作るところがすき！',rating:5,pal:0},
-  {id:2,title:'はらぺこあおむし',author:'エリック・カール',impression:'最後のちょうちょがきれいだった',rating:4,pal:1},
-  {id:3,title:'おおきなかぶ',author:'トルストイ',impression:'みんなで引っ張るのがおもしろい',rating:4,pal:2},
-];
-
-// スタンプ数は (全冊数 ÷ BOOK_GOAL) の整数部
-let extraStamps = 0; // デモ用に2スタンプ取得済みとする
-extraStamps = 2;
+let currentUser = null;
+let currentChild = null;
+let allChildren = [];
+let books = [];
+let STAMP_GOAL = 5;
+let REWARD_MEMO = '';
 let editingId = null;
 let currentRating = 0;
-
-const children = [
-  {name:'はなちゃん',avatar:'🌸',title:'⭐ レベル3 ／ ほしよみ師'},
-  {name:'そらくん',  avatar:'🚀',title:'⭐ レベル2 ／ よみはじめ'},
-];
-let childIdx = 0;
+let selectedAvatar = '🌸';
 
 // ===== COMPUTED =====
-function getProgress() { return books.length % BOOK_GOAL; }
-function getStampCount() { return Math.floor(books.length / BOOK_GOAL) + extraStamps; }
-function getStampProgress() { return getStampCount() % STAMP_GOAL; }
+function getProgress()     { return books.length % BOOK_GOAL; }
+function getStampCount()   { return currentChild ? currentChild.stamp_count : 0; }
+function getStampProgress(){ return getStampCount() % STAMP_GOAL; }
+
+// ===== AUTH UI =====
+let authMode = 'login';
+function showAuthTab(mode) {
+  authMode = mode;
+  document.getElementById('tabLogin').classList.toggle('active', mode==='login');
+  document.getElementById('tabSignup').classList.toggle('active', mode==='signup');
+  document.getElementById('authSubmitBtn').textContent = mode==='login' ? 'ログイン' : '新規登録';
+  document.getElementById('authError').textContent = '';
+}
+async function handleAuth() {
+  const email = document.getElementById('authEmail').value.trim();
+  const pass  = document.getElementById('authPassword').value;
+  const errEl = document.getElementById('authError');
+  errEl.textContent = '';
+  if (!email || !pass) { errEl.textContent = 'メールとパスワードを入力してください'; return; }
+  const btn = document.getElementById('authSubmitBtn');
+  btn.textContent = '…'; btn.disabled = true;
+  const { error } = authMode === 'login'
+    ? await _sb.auth.signInWithPassword({ email, password: pass })
+    : await _sb.auth.signUp({ email, password: pass });
+  btn.disabled = false;
+  btn.textContent = authMode === 'login' ? 'ログイン' : '新規登録';
+  if (error) { errEl.textContent = error.message; return; }
+  if (authMode === 'signup') errEl.style.color = '#0a8'; errEl.textContent = authMode === 'signup' ? '登録しました！メールを確認してください ✉️' : '';
+}
+async function signOut() {
+  await _sb.auth.signOut();
+}
+
+// ===== CHILD SETUP =====
+function initAvatarPicker() {
+  const picker = document.getElementById('avatarPicker');
+  picker.innerHTML = '';
+  AVATARS.forEach(a => {
+    const el = document.createElement('div');
+    el.className = 'avatar-opt' + (a === selectedAvatar ? ' selected' : '');
+    el.textContent = a;
+    el.onclick = () => {
+      selectedAvatar = a;
+      document.querySelectorAll('.avatar-opt').forEach(x => x.classList.remove('selected'));
+      el.classList.add('selected');
+    };
+    picker.appendChild(el);
+  });
+}
+async function createChild() {
+  const name = document.getElementById('childNameInput').value.trim();
+  const errEl = document.getElementById('childSetupError');
+  if (!name) { errEl.textContent = 'なまえを入力してください'; return; }
+  const { data, error } = await _sb
+    .from('children')
+    .insert({ user_id: currentUser.id, name, avatar_emoji: selectedAvatar })
+    .select().single();
+  if (error) { errEl.textContent = error.message; return; }
+  document.getElementById('childSetupOverlay').style.display = 'none';
+  await loadChild(data);
+}
+
+// ===== LOAD DATA =====
+async function loadChildren() {
+  const { data } = await _sb.from('children').select('*').order('created_at');
+  allChildren = data || [];
+  if (!allChildren.length) {
+    initAvatarPicker();
+    document.getElementById('childSetupOverlay').style.display = 'flex';
+  } else {
+    await loadChild(allChildren[0]);
+  }
+}
+async function loadChild(child) {
+  currentChild = child;
+  STAMP_GOAL  = child.stamp_goal  || 5;
+  REWARD_MEMO = child.reward_memo || '';
+  const { data } = await _sb.from('books').select('*').eq('child_id', child.id).order('created_at');
+  books = data || [];
+  renderChildInfo();
+  renderAll();
+}
+function renderChildInfo() {
+  const c = currentChild;
+  if (!c) return;
+  const title = getTitle(c.total_books);
+  document.getElementById('heroAvatar').textContent     = c.avatar_emoji;
+  document.getElementById('heroName').textContent       = c.name;
+  document.getElementById('heroTitle').textContent      = title;
+  document.getElementById('switcherAvatar').textContent = c.avatar_emoji;
+  document.getElementById('switcherName').textContent   = c.name;
+  document.getElementById('currentStreakNum').innerHTML = `${c.current_streak}<span>にち</span>`;
+  document.getElementById('longestStreakNum').innerHTML = `${c.longest_streak}<span>にち</span>`;
+}
+function getTitle(total) {
+  if (total >= 30) return '⭐ レベル5 ／ でんせつの読み手';
+  if (total >= 20) return '⭐ レベル4 ／ ほんのまじょ';
+  if (total >= 10) return '⭐ レベル3 ／ まほうよみ';
+  if (total >= 5)  return '⭐ レベル2 ／ ほしよみ師';
+  return '⭐ レベル1 ／ よみはじめ';
+}
+async function switchChild() {
+  if (allChildren.length < 2) return;
+  const idx = allChildren.findIndex(c => c.id === currentChild.id);
+  await loadChild(allChildren[(idx + 1) % allChildren.length]);
+}
 
 // ===== RENDER: BOOK TRACK =====
 function renderTrack() {
@@ -733,7 +930,7 @@ function renderTrack() {
   track.innerHTML = '';
   for (let i = 0; i < BOOK_GOAL; i++) {
     const done = i < prog;
-    const cur  = i === prog;
+    const cur  = books.length > 0 && i === prog;
     const slot = document.createElement('div');
     slot.className = 'book-slot';
     const wrap = document.createElement('div');
@@ -870,39 +1067,62 @@ function updateStars() {
 }
 
 // ===== SUBMIT =====
-function submitBook() {
+async function submitBook() {
   const title = document.getElementById('inputTitle').value.trim();
   if (!title) { document.getElementById('inputTitle').focus(); return; }
-  const prevBooks = books.length;
+  const author     = document.getElementById('inputAuthor').value.trim();
+  const impression = document.getElementById('inputImpression').value.trim();
+  const rating     = currentRating || 3;
   const prevStamps = getStampCount();
+
   if (editingId) {
-    const b = books.find(x => x.id === editingId);
-    if (b) { b.title=title; b.author=document.getElementById('inputAuthor').value.trim(); b.impression=document.getElementById('inputImpression').value.trim(); b.rating=currentRating||3; }
+    const { data, error } = await _sb.from('books')
+      .update({ title, author, impression, rating, updated_at: new Date().toISOString() })
+      .eq('id', editingId).select().single();
+    if (!error) books = books.map(b => b.id === editingId ? data : b);
   } else {
-    books.push({id:Date.now(),title,author:document.getElementById('inputAuthor').value.trim(),impression:document.getElementById('inputImpression').value.trim(),rating:currentRating||3,pal:books.length%BOOK_PALETTES.length});
+    const { data, error } = await _sb.from('books')
+      .insert({ child_id: currentChild.id, title, author, impression, rating })
+      .select().single();
+    if (!error) {
+      books.push(data);
+      await updateChildStats(prevStamps);
+    }
   }
   closeModal();
   renderAll();
-  // スタンプ獲得チェック（5冊ゴール達成）
-  if (!editingId && books.length > prevBooks) {
-    const newStamps = getStampCount();
-    if (newStamps > prevStamps) {
-      setTimeout(() => showStampGet(newStamps), 400);
-    }
+}
+
+async function updateChildStats(prevStamps) {
+  const total      = books.length;
+  const newStamps  = Math.floor(total / BOOK_GOAL);
+  const today      = new Date().toISOString().slice(0,10);
+  const last       = currentChild.last_read_date;
+  const yesterday  = new Date(Date.now()-86400000).toISOString().slice(0,10);
+  let streak = currentChild.current_streak;
+  if (last === today)      { /* same day, no change */ }
+  else if (last === yesterday) { streak += 1; }
+  else                         { streak = 1; }
+  const longest = Math.max(streak, currentChild.longest_streak);
+  const { data } = await _sb.from('children')
+    .update({ total_books: total, stamp_count: newStamps, current_streak: streak, longest_streak: longest, last_read_date: today })
+    .eq('id', currentChild.id).select().single();
+  if (data) {
+    currentChild = data;
+    STAMP_GOAL   = data.stamp_goal  || 5;
+    REWARD_MEMO  = data.reward_memo || '';
+    renderChildInfo();
+  }
+  if (newStamps > prevStamps) {
+    setTimeout(() => showStampGet(newStamps), 400);
   }
 }
 
-// ===== EDIT / DELETE =====
+// ===== EDIT =====
 function editBook(id, e) {
   e.stopPropagation();
   const b = books.find(x => x.id === id);
   if (b) openModal(b);
-}
-function deleteBook(id, e) {
-  e.stopPropagation();
-  const el = e.target.closest('.book-list-item');
-  el.style.cssText += 'transform:scale(0.88);opacity:0;transition:all 0.3s ease;';
-  setTimeout(() => { books = books.filter(x => x.id !== id); renderAll(); }, 280);
 }
 
 // ===== STAMP GET =====
@@ -954,16 +1174,6 @@ function launchConfetti(n) {
   }
 }
 
-// ===== CHILD SWITCH =====
-function switchChild() {
-  childIdx = (childIdx+1) % children.length;
-  const c = children[childIdx];
-  document.getElementById('heroAvatar').textContent    = c.avatar;
-  document.getElementById('heroName').textContent      = c.name;
-  document.getElementById('heroTitle').textContent     = c.title;
-  document.getElementById('switcherAvatar').textContent = c.avatar;
-  document.getElementById('switcherName').textContent   = c.name;
-}
 
 // ===== PARTICLES =====
 const emojis = ['✦','⭐','💎','🌸','✨','🎀','💫','🌟'];
@@ -995,9 +1205,16 @@ const obs = new IntersectionObserver(entries => {
 document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 
 // ===== INIT =====
-renderAll();
-
-// スタンプバー遅延アニメ
+_sb.auth.onAuthStateChange(async (event, session) => {
+  currentUser = session?.user || null;
+  if (currentUser) {
+    document.getElementById('authOverlay').style.display = 'none';
+    await loadChildren();
+  } else {
+    document.getElementById('authOverlay').style.display = 'flex';
+    document.getElementById('childSetupOverlay').style.display = 'none';
+  }
+});
 </script>
 </body>
 </html>
