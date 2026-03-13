@@ -910,11 +910,16 @@ function renderChildInfo() {
   document.getElementById('longestStreakNum').innerHTML = `${c.longest_streak}<span>にち</span>`;
 }
 function getTitle(total) {
-  if (total >= 30) return '⭐ レベル5 ／ でんせつの読み手';
-  if (total >= 20) return '⭐ レベル4 ／ ほんのまじょ';
-  if (total >= 10) return '⭐ レベル3 ／ まほうよみ';
-  if (total >= 5)  return '⭐ レベル2 ／ ほしよみ師';
-  return '⭐ レベル1 ／ よみはじめ';
+  if (total >= 300) return '⭐ レベル10 ／ えいえんの書の大魔導士'; 
+  if (total >= 200) return '⭐ レベル9 ／ ぎんが図書館の賢者'; 
+  if (total >= 150) return '⭐ レベル8 ／ 月の書の守り手'; 
+  if (total >= 100) return '⭐ レベル7 ／ 星の書の読み手'; 
+  if (total >= 50) return '⭐ レベル6 ／ まほう図書館の司書';
+  if (total >= 30) return '⭐ レベル5 ／ でんせつの書の読み手'; 
+  if (total >= 20) return '⭐ レベル4 ／ ほんのまじょ'; 
+  if (total >= 10) return '⭐ レベル3 ／ まほうよみ'; 
+  if (total >= 5) return '⭐ レベル2 ／ ほしよみ師';  
+  return '⭐ レベル1 ／ みならい読書家';
 }
 function switchChild() {
   if (allChildren.length < 2) return;
