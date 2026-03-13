@@ -820,7 +820,7 @@ const BOOK_IMGS = [
   "assets/books/book4.png","assets/books/book5.png",
 ];
 const BOOK_GOAL = 5;
-const AVATARS = ['🌸','🌟','🐰','🦄','🌈','🍀','🦋','🌙','🎀','⭐','🚀','🐻','😺','🐶','🚗'];
+const AVATARS = ['🌙','⭐️','💎','🪄','🔮','🎀','👑','👗','🪽','📖','🍭','🐈','🐰','🦄','🦋','🍀'];
 
 // ===== STATE =====
 let currentChild = null;
@@ -830,7 +830,7 @@ let STAMP_GOAL = 5;
 let REWARD_MEMO = '';
 let editingId = null;
 let currentRating = 0;
-let selectedAvatar = '🌸';
+let selectedAvatar = '🌙';
 
 // ===== COMPUTED =====
 function getTotalBooks()   { return currentChild ? currentChild.total_books : 0; }
@@ -1170,7 +1170,7 @@ function launchConfetti(n) {
 
 
 // ===== PARTICLES =====
-const emojis = ['✦','⭐','💎','🌸','✨','🎀','💫','🌟'];
+const emojis = ['✦','✨'];
 const pWrap = document.getElementById('particles');
 for (let i=0;i<16;i++) {
   const p = document.createElement('div');
