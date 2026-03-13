@@ -1129,7 +1129,7 @@ function editBook(id, e) {
 function showStampGet(stamps) {
   const prog = stamps % STAMP_GOAL;
   const name = currentChild ? currentChild.name : '';
-  document.getElementById('stampPopupSub').innerHTML = `5さつよみきったよ！<br>すごい！${name} ✨`;
+  document.getElementById('stampPopupSub').innerHTML = `5さつよみきったよ！<br>すごい！${name}さん ✨`;
   document.getElementById('stampRewardMemo').textContent = REWARD_MEMO;
   document.getElementById('stampOverlay').classList.add('open');
   launchConfetti(40);
