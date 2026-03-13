@@ -612,7 +612,8 @@ main{
 
 <!-- ===== AUTH OVERLAY ===== -->
 <div id="authOverlay" class="full-overlay">
-  <div class="auth-card">
+  <div id="authLoading" style="display:none;text-align:center;padding:40px;font-size:18px;color:#7c4daa">✨ よみこんでいるよ...</div>
+  <div class="auth-card" id="authFormCard">
     <div class="auth-logo">✦ Magical Library ✦</div>
     <p class="auth-sub">まほうの図書館へようこそ ✨</p>
     <div class="auth-tabs">
@@ -760,12 +761,11 @@ main{
   <div class="stamp-popup">
     <span class="popup-emoji">🎖</span>
     <div class="popup-title">スタンプゲット！</div>
-    <div class="popup-sub">5さつよみきったよ！<br>すごい！はなちゃん ✨</div>
+    <div class="popup-sub" id="stampPopupSub">5さつよみきったよ！<br>すごい！✨</div>
     <div class="popup-reward" id="stampRewardBox">
       <div class="popup-reward-label">🎁 ごほうびのめやす</div>
       <div id="stampRewardMemo">スタンプ1個でお菓子</div>
     </div>
-    <div style="font-size:12px;color:var(--text-lt);margin-bottom:16px" id="stampCountMsg">スタンプ あと3こでごほうび！</div>
     <button class="btn-popup" onclick="closeStampOverlay()">また5さつ目指すぞ！ ✦</button>
   </div>
 </div>
@@ -802,7 +802,7 @@ const BOOK_IMGS = [
   "assets/books/book4.png","assets/books/book5.png",
 ];
 const BOOK_GOAL = 5;
-const AVATARS = ['🌸','🌟','🐰','🦄','🌈','🍀','🦋','🌙','🎀','⭐','🚀','🐻'];
+const AVATARS = ['🌸','🌟','🐰','🦄','🌈','🍀','🦋','🌙','🎀','⭐','🚀','🐻','😺','🐶','🚗'];
 
 // ===== STATE =====
 let currentUser = null;
@@ -822,6 +822,20 @@ function getStampCount()   { return currentChild ? currentChild.stamp_count : 0;
 function getStampProgress(){ return getStampCount() % STAMP_GOAL; }
 
 // ===== AUTH UI =====
+function showAuthLoading() {
+  document.getElementById('authFormCard').style.display = 'none';
+  document.getElementById('authLoading').style.display = 'block';
+  document.getElementById('authOverlay').style.display = 'flex';
+}
+function showAuthForm() {
+  document.getElementById('authLoading').style.display = 'none';
+  document.getElementById('authFormCard').style.display = '';
+  document.getElementById('authOverlay').style.display = 'flex';
+}
+function hideAuthOverlay() {
+  document.getElementById('authOverlay').style.display = 'none';
+}
+
 let authMode = 'login';
 function showAuthTab(mode) {
   authMode = mode;
@@ -1129,10 +1143,9 @@ function editBook(id, e) {
 // ===== STAMP GET =====
 function showStampGet(stamps) {
   const prog = stamps % STAMP_GOAL;
-  const remain = STAMP_GOAL - prog;
+  const name = currentChild ? currentChild.name : '';
+  document.getElementById('stampPopupSub').innerHTML = `5さつよみきったよ！<br>すごい！${name} ✨`;
   document.getElementById('stampRewardMemo').textContent = REWARD_MEMO;
-  document.getElementById('stampCountMsg').textContent =
-    remain > 0 ? `スタンプ あと${remain}こでごほうび！` : 'ごほうびまで あと少し！';
   document.getElementById('stampOverlay').classList.add('open');
   launchConfetti(40);
   // ごほうび達成チェック
@@ -1206,30 +1219,33 @@ const obs = new IntersectionObserver(entries => {
 document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 
 // ===== INIT =====
-// 認証状態の変化に反応（ログイン・ログアウト）
+let sessionHandled = false;
+
 _sb.auth.onAuthStateChange(async (event, session) => {
-  if (event === 'SIGNED_IN' && !currentChild) {
+  if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session?.user) {
+    if (sessionHandled) return;
+    sessionHandled = true;
     currentUser = session.user;
-    document.getElementById('authOverlay').style.display = 'none';
+    showAuthLoading();
     await loadChildren();
+    hideAuthOverlay();
   } else if (event === 'SIGNED_OUT') {
+    sessionHandled = false;
     currentUser = null; currentChild = null; books = [];
-    document.getElementById('authOverlay').style.display = 'flex';
+    showAuthForm();
     document.getElementById('childSetupOverlay').style.display = 'none';
   }
 });
 
-/// リロード時: 既存セッションを即時復元
+// リロード時: getSession でも確実に復元
 (async () => {
   const { data: { session } } = await _sb.auth.getSession();
-  if (session?.user) {
+  if (session?.user && !sessionHandled) {
+    sessionHandled = true;
     currentUser = session.user;
-    // ローディング表示（データ取得完了までオーバーレイを維持）
-    document.querySelector('#authOverlay .auth-card').innerHTML =
-      '<div style="text-align:center;padding:40px;font-size:16px;color:#7c4daa">✨ よみこんでいるよ...</div>';
-    document.getElementById('authOverlay').style.display = 'flex';
+    showAuthLoading();
     await loadChildren();
-    document.getElementById('authOverlay').style.display = 'none';
+    hideAuthOverlay();
   }
 })();
 </script>
