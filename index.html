@@ -816,7 +816,8 @@ let currentRating = 0;
 let selectedAvatar = '🌸';
 
 // ===== COMPUTED =====
-function getProgress()     { return books.length % BOOK_GOAL; }
+function getTotalBooks()   { return currentChild ? currentChild.total_books : 0; }
+function getProgress()     { return getTotalBooks() % BOOK_GOAL; }
 function getStampCount()   { return currentChild ? currentChild.stamp_count : 0; }
 function getStampProgress(){ return getStampCount() % STAMP_GOAL; }
 
@@ -1029,7 +1030,7 @@ function renderBooks() {
   } else {
     moreWrap.style.display = 'none';
   }
-  document.getElementById('totalBooksNum').innerHTML = `${books.length}<span>さつ</span>`;
+  document.getElementById('totalBooksNum').innerHTML = `${getTotalBooks()}<span>さつ</span>`;
 }
 
 function toggleMoreBooks() {
@@ -1205,16 +1206,28 @@ const obs = new IntersectionObserver(entries => {
 document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 
 // ===== INIT =====
+// 認証状態の変化に反応（ログイン・ログアウト）
 _sb.auth.onAuthStateChange(async (event, session) => {
-  currentUser = session?.user || null;
-  if (currentUser) {
+  if (event === 'SIGNED_IN' && !currentChild) {
+    currentUser = session.user;
     document.getElementById('authOverlay').style.display = 'none';
     await loadChildren();
-  } else {
+  } else if (event === 'SIGNED_OUT') {
+    currentUser = null; currentChild = null; books = [];
     document.getElementById('authOverlay').style.display = 'flex';
     document.getElementById('childSetupOverlay').style.display = 'none';
   }
 });
+
+// リロード時: 既存セッションを即時復元
+(async () => {
+  const { data: { session } } = await _sb.auth.getSession();
+  if (session?.user) {
+    currentUser = session.user;
+    document.getElementById('authOverlay').style.display = 'none';
+    await loadChildren();
+  }
+})();
 </script>
 </body>
 </html>
