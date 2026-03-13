@@ -1188,7 +1188,7 @@ for (let i=0;i<16;i++) {
 // ===== CLICK SPARKLE =====
 document.addEventListener('click', e => {
   const spark = document.createElement('div');
-  spark.textContent = ['✨','🌟','⭐','💫'][Math.floor(Math.random()*4)];
+  spark.textContent = ['✨','🪄','💫'][Math.floor(Math.random()*4)];
   spark.style.cssText = `position:fixed;pointer-events:none;z-index:9999;left:${e.clientX}px;top:${e.clientY}px;font-size:16px;transform:translate(-50%,-50%);animation:sparkleClick 0.6s ease-out forwards;`;
   document.body.appendChild(spark);
   setTimeout(()=>spark.remove(),600);
@@ -1204,7 +1204,7 @@ const obs = new IntersectionObserver(entries => {
 document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 
 // ===== SETTINGS =====
-let selectedSettingAvatar = '🌸';
+let selectedSettingAvatar = '🌙';
 
 function openSettings() {
   if (!currentChild) return;
