@@ -333,6 +333,17 @@ main{
   justify-content:space-between;
   margin-bottom:0;
 }
+.stamp-card.scrollable{overflow:visible;}
+.stamp-grid.scrollable{
+  flex-wrap:nowrap;
+  overflow-x:auto;
+  justify-content:flex-start;
+  gap:8px;
+  padding-bottom:4px;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+.stamp-grid.scrollable::-webkit-scrollbar{display:none;}
 .stamp{
   width:clamp(38px, 7vw, 48px);height:clamp(38px, 7vw, 48px);border-radius:50%;
   display:flex;align-items:center;justify-content:center;
@@ -1226,11 +1237,19 @@ function renderStampCard() {
   // 累計スター数バッジ更新
   document.getElementById('starBadgeNum').textContent = currentChild?.used_stamps ?? 0;
 
-  const displayCount = Math.max(STAMP_GOAL, STAMP_DISPLAY);
+  const totalUsed = currentChild?.used_stamps ?? 0;
+  const inHand = Math.max(0, getStampCount() - totalUsed);
+  const needsScroll = inHand > STAMP_DISPLAY;
+  const displayCount = needsScroll ? inHand : Math.max(STAMP_GOAL, STAMP_DISPLAY);
+  const card = document.querySelector('.stamp-card');
+  grid.classList.toggle('scrollable', needsScroll);
+  if (card) card.classList.toggle('scrollable', needsScroll);
+
   for (let i = 0; i < displayCount; i++) {
     const earned = i < prog;
     const el = document.createElement('div');
     el.className = 'stamp ' + (earned ? 'earned' : 'empty');
+    if (needsScroll) el.style.flexShrink = '0';
     if (earned) {
       const img = document.createElement('img');
       img.src = STAMP_STAR;
