@@ -1411,31 +1411,29 @@ function animateFullCompletion(callback) {
     const wraps = Array.from(document.getElementById('bookTrack').querySelectorAll('.book-img-wrap'));
     const last = wraps[BOOK_GOAL - 1];
 
-    // Step1: 5冊目を点灯
+    // Step1: 5冊目を点灯（transition無効化してアニメーション）
+    last.style.transition = 'none';
     last.style.animation = 'none';
-    last.style.webkitAnimation = 'none';
     requestAnimationFrame(() => {
       last.style.animation = 'bookActivate 1.5s ease';
-      last.style.webkitAnimation = 'bookActivate 1.5s ease';
 
       setTimeout(() => {
         last.style.animation = '';
-        last.style.webkitAnimation = '';
+        last.style.transition = '';
 
-        // Step2: 全5冊グロー
+        // Step2: 全5冊グロー（transition無効化してアニメーション）
         wraps.forEach(w => {
+          w.style.transition = 'none';
           w.style.animation = 'none';
-          w.style.webkitAnimation = 'none';
         });
         requestAnimationFrame(() => {
           wraps.forEach(w => {
             w.style.animation = 'fullCardGlow 1.5s ease';
-            w.style.webkitAnimation = 'fullCardGlow 1.5s ease';
           });
           setTimeout(() => {
             wraps.forEach(w => {
               w.style.animation = '';
-              w.style.webkitAnimation = '';
+              w.style.transition = '';
             });
             callback();
           }, 1500);
