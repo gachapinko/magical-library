@@ -260,8 +260,8 @@ main{
   40% {transform:scale(1.08);filter:brightness(1.7) drop-shadow(0 0 10px #ffe7ff) drop-shadow(0 0 18px #ffd6ff);}
   100%{transform:scale(1);   filter:brightness(1);}
 }
-.book-activate {animation:bookActivate 1.5s ease;}
-.book-full-glow{animation:fullCardGlow 1.5s ease;}
+.book-activate {animation:bookActivate 1.5s ease; transition:none!important;}
+.book-full-glow{animation:fullCardGlow 1.5s ease; transition:none!important; -webkit-animation:fullCardGlow 1.5s ease;}
 
 @keyframes bookTapPop{
   0%  {transform:translateY(0)    scale(1)    rotate(0deg);  filter:brightness(1);}
