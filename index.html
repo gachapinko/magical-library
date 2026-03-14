@@ -128,19 +128,6 @@ nav{
   display:block;
   animation:tooltipPop 0.35s var(--ease-spring) both,tooltipBounce 1.8s ease-in-out 0.4s infinite;
 }
-.child-switcher{
-  display:flex;align-items:center;gap:6px;
-  background:var(--card);
-  border:2px solid rgba(255,107,168,0.2);
-  border-radius:999px;
-  padding:4px 12px 4px 6px;
-  cursor:pointer;
-  box-shadow:0 2px 8px rgba(200,125,232,0.15);
-  transition:all 0.25s var(--ease-spring);
-}
-.child-switcher:hover{transform:scale(1.05);box-shadow:0 4px 12px rgba(200,125,232,0.2);}
-.child-switcher-avatar{font-size:20px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;}
-.child-switcher-name{font-size:12px;font-weight:700;color:var(--text-sub);}
 
 /* ===== MAIN ===== */
 main{
@@ -537,8 +524,6 @@ main{
 }
 .btn-edit{background:rgba(200,168,240,0.18);}
 .btn-edit:hover{background:rgba(200,168,240,0.38);transform:scale(1.2);}
-.btn-delete{background:rgba(255,107,107,0.12);}
-.btn-delete:hover{background:rgba(255,107,107,0.28);transform:scale(1.2);}
 
 /* ===== FAB ===== */
 .fab-wrap{
@@ -581,14 +566,20 @@ main{
   animation:tooltipPop 0.35s var(--ease-spring) both,tooltipBounce 1.8s ease-in-out 0.4s infinite;
 }
 
+/* ===== OVERLAYS (common) ===== */
+.modal-overlay,.stamp-overlay,.levelup-overlay{
+  position:fixed;inset:0;backdrop-filter:blur(8px);
+  display:flex;opacity:0;pointer-events:none;
+}
+.modal-overlay.open,.stamp-overlay.open,.levelup-overlay.open{opacity:1;pointer-events:all;}
+
 /* ===== BOTTOM SHEET MODAL ===== */
 .modal-overlay{
-  position:fixed;inset:0;z-index:300;
-  background:rgba(74,46,74,0.45);backdrop-filter:blur(8px);
-  display:flex;align-items:flex-end;justify-content:center;
-  opacity:0;pointer-events:none;transition:opacity 0.3s ease;
+  z-index:300;
+  background:rgba(74,46,74,0.45);
+  align-items:flex-end;justify-content:center;
+  transition:opacity 0.3s ease;
 }
-.modal-overlay.open{opacity:1;pointer-events:all;}
 .modal{
   width:100%;max-width:480px;
   background:#FFF5F8;
@@ -645,12 +636,10 @@ main{
 
 /* ===== STAMP GET OVERLAY ===== */
 .stamp-overlay{
-  position:fixed;inset:0;z-index:400;
-  background:rgba(74,46,74,0.5);backdrop-filter:blur(8px);
-  display:flex;align-items:center;justify-content:center;
-  opacity:0;pointer-events:none;transition:opacity 0.4s ease;
+  z-index:400;background:rgba(74,46,74,0.5);
+  align-items:center;justify-content:center;
+  transition:opacity 0.4s ease;
 }
-.stamp-overlay.open{opacity:1;pointer-events:all;}
 .stamp-popup{
   background:linear-gradient(135deg,#FFF5F8,#F5E8FF);
   border-radius:28px;padding:40px 28px;
@@ -688,12 +677,10 @@ main{
 
 /* ===== LEVEL UP OVERLAY ===== */
 .levelup-overlay{
-  position:fixed;inset:0;z-index:401;
-  background:rgba(74,46,74,0.55);backdrop-filter:blur(8px);
-  display:flex;align-items:center;justify-content:center;
-  opacity:0;pointer-events:none;transition:opacity 0.4s ease;
+  z-index:401;background:rgba(74,46,74,0.55);
+  align-items:center;justify-content:center;
+  transition:opacity 0.4s ease;
 }
-.levelup-overlay.open{opacity:1;pointer-events:all;}
 .levelup-popup{
   background:linear-gradient(150deg,#FFFBEC,#FFF4E0,#FFF0F8);
   border-radius:28px;padding:32px 24px 28px;
@@ -1116,21 +1103,22 @@ function getProgress()     { return getTotalBooks() % BOOK_GOAL; }
 function getStampCount()   { return currentChild ? currentChild.stamp_count : 0; }
 
 // ===== CHILD SETUP =====
-function initAvatarPicker() {
-  const picker = document.getElementById('avatarPicker');
+function buildAvatarPicker(pickerId, getVal, setVal) {
+  const picker = document.getElementById(pickerId);
   picker.innerHTML = '';
   AVATARS.forEach(a => {
     const el = document.createElement('div');
-    el.className = 'avatar-opt' + (a === selectedAvatar ? ' selected' : '');
+    el.className = 'avatar-opt' + (a === getVal() ? ' selected' : '');
     el.textContent = a;
     el.onclick = () => {
-      selectedAvatar = a;
-      document.querySelectorAll('.avatar-opt').forEach(x => x.classList.remove('selected'));
+      setVal(a);
+      picker.querySelectorAll('.avatar-opt').forEach(x => x.classList.remove('selected'));
       el.classList.add('selected');
     };
     picker.appendChild(el);
   });
 }
+function initAvatarPicker() { buildAvatarPicker('avatarPicker', () => selectedAvatar, v => { selectedAvatar = v; }); }
 function createChild() {
   const name = document.getElementById('childNameInput').value.trim();
   const errEl = document.getElementById('childSetupError');
@@ -1203,11 +1191,6 @@ function getTitle(total) {
   if (total >= 10) return 'レベル3 まほうの書の読み手';
   if (total >= 5) return 'レベル2 ちいさな魔法使い';
   return 'レベル1 まほう図書館みならい';
-}
-function switchChild() {
-  if (allChildren.length < 2) return;
-  const idx = allChildren.findIndex(c => c.id === currentChild.id);
-  loadChild(allChildren[(idx + 1) % allChildren.length]);
 }
 
 // ===== RENDER: BOOK TRACK =====
@@ -1387,21 +1370,7 @@ function submitBook() {
     const newProg = getProgress();
     const wraps = document.getElementById('bookTrack').querySelectorAll('.book-img-wrap');
     const target = wraps[newProg - 1];
-    if (target) {
-      const img = target.querySelector('img');
-      target.style.transition = 'none';
-      target.style.animation = 'none';
-      if (img) { img.style.transition = 'none'; img.style.animation = 'none'; }
-      requestAnimationFrame(() => {
-        target.style.animation = 'bookActivate 1.5s ease';
-        if (img) img.style.animation = 'bookActivateFilter 1.5s ease';
-        setTimeout(() => {
-          target.style.animation = '';
-          target.style.transition = '';
-          if (img) { img.style.animation = ''; img.style.transition = ''; }
-        }, 1500);
-      });
-    }
+    if (target) playBookAnim(target, 'bookActivate 1.5s ease', 'bookActivateFilter 1.5s ease', 1500);
     if (leveledUp) setTimeout(() => showLevelUp(newLevelTitle, newTotal, name), 600);
   }
 }
@@ -1426,51 +1395,38 @@ function renderTrackAllDone() {
   document.getElementById('goalMsg').innerHTML = '💫 スタンプゲット！おめでとう！';
 }
 
-// 5冊達成アニメーション本体（終了後にcallback）
 // インラインstyle + rAF でモバイルSafariでも確実に動作させる
+function playBookAnim(wraps, animName, filterAnimName, duration, cb) {
+  const ws = Array.isArray(wraps) ? wraps : [wraps];
+  ws.forEach(w => {
+    const img = w.querySelector('img');
+    w.style.transition = w.style.animation = 'none';
+    if (img) img.style.transition = img.style.animation = 'none';
+  });
+  requestAnimationFrame(() => {
+    ws.forEach(w => {
+      const img = w.querySelector('img');
+      w.style.animation = animName;
+      if (img) img.style.animation = filterAnimName;
+    });
+    setTimeout(() => {
+      ws.forEach(w => {
+        const img = w.querySelector('img');
+        w.style.animation = w.style.transition = '';
+        if (img) img.style.animation = img.style.transition = '';
+      });
+      if (cb) cb();
+    }, duration);
+  });
+}
+
+// 5冊達成アニメーション本体（終了後にcallback）
 function animateFullCompletion(callback) {
   requestAnimationFrame(() => requestAnimationFrame(() => {
     const wraps = Array.from(document.getElementById('bookTrack').querySelectorAll('.book-img-wrap'));
-    const last = wraps[BOOK_GOAL - 1];
-
-    // Step1: 5冊目を点灯（wrapper=transform, img=filter を別々に）
-    const lastImg = last.querySelector('img');
-    last.style.transition = 'none';
-    last.style.animation = 'none';
-    if (lastImg) { lastImg.style.transition = 'none'; lastImg.style.animation = 'none'; }
-    requestAnimationFrame(() => {
-      last.style.animation = 'bookActivate 1.5s ease';
-      if (lastImg) lastImg.style.animation = 'bookActivateFilter 1.5s ease';
-
-      setTimeout(() => {
-        last.style.animation = '';
-        last.style.transition = '';
-        if (lastImg) { lastImg.style.animation = ''; lastImg.style.transition = ''; }
-
-        // Step2: 全5冊グロー（wrapper=transform, img=filter を別々に）
-        wraps.forEach(w => {
-          const img = w.querySelector('img');
-          w.style.transition = 'none';
-          w.style.animation = 'none';
-          if (img) { img.style.transition = 'none'; img.style.animation = 'none'; }
-        });
-        requestAnimationFrame(() => {
-          wraps.forEach(w => {
-            const img = w.querySelector('img');
-            w.style.animation = 'fullCardGlow 1.5s ease';
-            if (img) img.style.animation = 'fullCardGlowFilter 1.5s ease';
-          });
-          setTimeout(() => {
-            wraps.forEach(w => {
-              const img = w.querySelector('img');
-              w.style.animation = '';
-              w.style.transition = '';
-              if (img) { img.style.animation = ''; img.style.transition = ''; }
-            });
-            callback();
-          }, 1500);
-        });
-      }, 1500);
+    // Step1: 5冊目を点灯、Step2: 全5冊グロー
+    playBookAnim(wraps[BOOK_GOAL - 1], 'bookActivate 1.5s ease', 'bookActivateFilter 1.5s ease', 1500, () => {
+      playBookAnim(wraps, 'fullCardGlow 1.5s ease', 'fullCardGlowFilter 1.5s ease', 1500, callback);
     });
   }));
 }
@@ -1758,21 +1714,7 @@ function openSettings() {
 function closeSettings() { document.getElementById('settingsOverlay').classList.remove('open'); hideResetConfirm(); }
 function closeSettingsOutside(e) { if (e.target.id === 'settingsOverlay') closeSettings(); }
 
-function initSettingAvatarPicker() {
-  const picker = document.getElementById('settingAvatarPicker');
-  picker.innerHTML = '';
-  AVATARS.forEach(a => {
-    const el = document.createElement('div');
-    el.className = 'avatar-opt' + (a === selectedSettingAvatar ? ' selected' : '');
-    el.textContent = a;
-    el.onclick = () => {
-      selectedSettingAvatar = a;
-      picker.querySelectorAll('.avatar-opt').forEach(x => x.classList.remove('selected'));
-      el.classList.add('selected');
-    };
-    picker.appendChild(el);
-  });
-}
+function initSettingAvatarPicker() { buildAvatarPicker('settingAvatarPicker', () => selectedSettingAvatar, v => { selectedSettingAvatar = v; }); }
 
 function saveSettings() {
   const name = document.getElementById('settingName').value.trim();
