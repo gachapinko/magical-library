@@ -502,6 +502,30 @@ main{
 }
 .fab:hover{transform:translateX(-50%) translateY(-4px);box-shadow:0 9px 0 #a0459a,0 14px 36px rgba(255,107,168,0.45);}
 .fab:active{transform:translateX(-50%) translateY(2px);box-shadow:0 3px 0 #a0459a,0 4px 12px rgba(255,107,168,0.3);}
+.fab-tooltip{
+  display:none;
+  position:fixed;bottom:96px;left:50%;transform:translateX(-50%);
+  background:linear-gradient(135deg,#e8f7ff,#d0effa);
+  border:2px solid rgba(137,196,244,0.5);
+  border-radius:16px;padding:8px 14px;
+  font-size:12px;font-weight:700;color:#2a7aa0;
+  white-space:nowrap;
+  box-shadow:0 4px 16px rgba(137,196,244,0.3);
+  z-index:199;
+  animation:tooltipPop 0.35s var(--ease-spring) both;
+}
+.fab-tooltip::after{
+  content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
+  border:7px solid transparent;border-top-color:rgba(137,196,244,0.5);
+}
+.fab-tooltip::before{
+  content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:-2px;
+  border:5px solid transparent;border-top-color:#d0effa;z-index:1;
+}
+.fab-tooltip.visible{
+  display:block;
+  animation:tooltipPop 0.35s var(--ease-spring) both,tooltipBounce 1.8s ease-in-out 0.4s infinite;
+}
 
 /* ===== BOTTOM SHEET MODAL ===== */
 .modal-overlay{
@@ -840,6 +864,7 @@ main{
 </main>
 
 <!-- FAB -->
+<div class="fab-tooltip" id="fabTooltip">📖 よんだほんをきろくしてスタンプをもらおう</div>
 <button class="fab" onclick="openModal()">📖 ほんをきろくする ✨</button>
 
 <!-- ADD/EDIT MODAL -->
@@ -859,7 +884,7 @@ main{
       <label class="form-label">かんそう ♡</label>
       <textarea class="form-textarea" id="inputImpression" placeholder="たのしかった！どきどきした！"></textarea>
     </div>
-    <button class="btn-submit" id="submitBtn" onclick="submitBook()">よんだよ！おぼえておいてね 🌟</button>
+    <button class="btn-submit" id="submitBtn" onclick="submitBook()">よんだよ🌟</button>
   </div>
 </div>
 
@@ -1182,12 +1207,13 @@ function renderAll() { renderTrack(); renderStampCard(); renderBooks(); }
 
 // ===== MODAL =====
 function openModal(prefill) {
+  hideFabTooltip();
   editingId = prefill?.id || null;
   document.getElementById('inputTitle').value      = prefill?.title || '';
   document.getElementById('inputAuthor').value     = prefill?.author || '';
   document.getElementById('inputImpression').value = prefill?.impression || '';
   document.getElementById('modalTitle').textContent = editingId ? 'ほんをなおす ✏️' : 'ほんをきろくする 📖';
-  document.getElementById('submitBtn').textContent  = editingId ? 'なおしたよ！✨' : 'よんだよ！おぼえておいてね 🌟';
+  document.getElementById('submitBtn').textContent  = editingId ? 'なおしたよ！✨' : 'よんだよ🌟';
   document.getElementById('modalOverlay').classList.add('open');
   setTimeout(() => document.getElementById('inputTitle').focus(), 400);
 }
@@ -1476,13 +1502,24 @@ function hideOnboardingTooltip() {
   if (tip) tip.classList.remove('visible');
   localStorage.removeItem('ml_onboarding_reward');
 }
+function showFabTooltip() {
+  const tip = document.getElementById('fabTooltip');
+  if (tip) tip.classList.add('visible');
+}
+function hideFabTooltip() {
+  const tip = document.getElementById('fabTooltip');
+  if (tip) tip.classList.remove('visible');
+  localStorage.removeItem('ml_onboarding_book');
+}
 
 // ===== SETTINGS =====
 let selectedSettingAvatar = '🌙';
+let _settingsOpenedFromOnboarding = false;
 
 function openSettings() {
   if (!currentChild) return;
   const isOnboarding = !!localStorage.getItem('ml_onboarding_reward');
+  _settingsOpenedFromOnboarding = isOnboarding;
   hideOnboardingTooltip();
   document.getElementById('settingName').value = currentChild.name;
   document.getElementById('settingReward').value = currentChild.reward_memo || '';
@@ -1527,7 +1564,13 @@ function saveSettings() {
   saveStorage(storage);
   renderChildInfo();
   renderAll();
+  const wasOnboarding = _settingsOpenedFromOnboarding;
+  _settingsOpenedFromOnboarding = false;
   closeSettings();
+  if (wasOnboarding && reward) {
+    localStorage.setItem('ml_onboarding_book', '1');
+    setTimeout(showFabTooltip, 400);
+  }
 }
 
 function exportBooks() {
@@ -1545,6 +1588,7 @@ function exportBooks() {
 // ===== INIT =====
 loadChildren();
 if (localStorage.getItem('ml_onboarding_reward')) showOnboardingTooltip();
+if (localStorage.getItem('ml_onboarding_book')) showFabTooltip();
 
 // ===== RESET =====
 function showResetConfirm() {
