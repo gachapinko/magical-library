@@ -208,6 +208,20 @@ main{
   filter:grayscale(0.85) brightness(0.55) opacity(0.5);
 }
 
+/* ===== BOOK ACTIVATE ANIMATION ===== */
+@keyframes bookActivate{
+  0%  {transform:scale(1);   filter:brightness(1);}
+  50% {transform:scale(1.15);filter:brightness(1.6) drop-shadow(0 0 12px #ffd6ff);}
+  100%{transform:scale(1);   filter:brightness(1);}
+}
+@keyframes fullCardGlow{
+  0%  {transform:scale(1);   filter:brightness(1);}
+  40% {transform:scale(1.08);filter:brightness(1.7) drop-shadow(0 0 10px #ffe7ff) drop-shadow(0 0 18px #ffd6ff);}
+  100%{transform:scale(1);   filter:brightness(1);}
+}
+.book-activate {animation:bookActivate 0.5s ease;}
+.book-full-glow{animation:fullCardGlow 0.45s ease;}
+
 
 /* ゴールメッセージ */
 .goal-msg{
@@ -1091,7 +1105,6 @@ function submitBook() {
   if (!title) { document.getElementById('inputTitle').focus(); return; }
   const author     = document.getElementById('inputAuthor').value.trim();
   const impression = document.getElementById('inputImpression').value.trim();
-  const prevStamps = getStampCount();
   const storage = loadStorage();
 
   if (editingId) {
@@ -1099,15 +1112,81 @@ function submitBook() {
     if (idx !== -1) books[idx] = { ...books[idx], title, author, impression };
     storage.books[currentChild.id] = books;
     saveStorage(storage);
-  } else {
-    const book = { id: Date.now().toString(), child_id: currentChild.id, title, author, impression };
-    books.push(book);
-    storage.books[currentChild.id] = books;
-    saveStorage(storage);
-    updateChildStats(prevStamps, storage);
+    closeModal();
+    renderAll();
+    return;
   }
+
+  // 新規記録
+  const prevStamps = getStampCount();
+  const book = { id: Date.now().toString(), child_id: currentChild.id, title, author, impression };
+  books.push(book);
+  storage.books[currentChild.id] = books;
+  saveStorage(storage);
+  const { newStamps } = updateChildStats(prevStamps, storage);
+  const isFullComplete = newStamps > prevStamps;
   closeModal();
-  renderAll();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  if (isFullComplete) {
+    // 5冊達成：全スロットをdoneで描画してアニメーション → renderAll → popup
+    renderTrackAllDone();
+    renderStampCard();
+    renderBooks();
+    animateFullCompletion(() => {
+      renderAll();
+      showStampGet(newStamps);
+    });
+  } else {
+    // 通常：renderAll後に新しく点灯したスロットをアニメーション
+    renderAll();
+    const newProg = getProgress();
+    const wraps = document.getElementById('bookTrack').querySelectorAll('.book-img-wrap');
+    const target = wraps[newProg - 1];
+    if (target) {
+      target.classList.add('book-activate');
+      setTimeout(() => target.classList.remove('book-activate'), 500);
+    }
+  }
+}
+
+// 5冊全達成時の一時描画（all done 状態）
+function renderTrackAllDone() {
+  const track = document.getElementById('bookTrack');
+  track.innerHTML = '';
+  for (let i = 0; i < BOOK_GOAL; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'book-slot';
+    const wrap = document.createElement('div');
+    wrap.className = 'book-img-wrap done';
+    const img = document.createElement('img');
+    img.src = BOOK_IMGS[i];
+    img.alt = `まほうの本 ${i+1}`;
+    wrap.appendChild(img);
+    slot.append(wrap);
+    track.appendChild(slot);
+  }
+  document.getElementById('goalCount').textContent = `5 / 5 さつ`;
+  document.getElementById('goalMsg').innerHTML = '🎖 スタンプゲット！おめでとう！';
+}
+
+// 5冊達成アニメーション本体（終了後にcallback）
+function animateFullCompletion(callback) {
+  const wraps = Array.from(document.getElementById('bookTrack').querySelectorAll('.book-img-wrap'));
+  const last = wraps[BOOK_GOAL - 1];
+  // Step1: 5冊目を点灯
+  last.classList.add('book-activate');
+  setTimeout(() => {
+    last.classList.remove('book-activate');
+    // Step2: 100ms後に全5冊グロー
+    setTimeout(() => {
+      wraps.forEach(w => w.classList.add('book-full-glow'));
+      setTimeout(() => {
+        wraps.forEach(w => w.classList.remove('book-full-glow'));
+        callback();
+      }, 450);
+    }, 100);
+  }, 500);
 }
 
 function updateChildStats(prevStamps, storage) {
@@ -1129,9 +1208,7 @@ function updateChildStats(prevStamps, storage) {
   allChildren = storage.children;
   saveStorage(storage);
   renderChildInfo();
-  if (newStamps > prevStamps) {
-    setTimeout(() => showStampGet(newStamps), 400);
-  }
+  return { newStamps, prevStamps };
 }
 
 // ===== STAMP CONSUME =====
