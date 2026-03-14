@@ -89,6 +89,43 @@ nav{
   transition:background 0.2s,transform 0.25s var(--ease-spring);
 }
 .nav-btn:hover{background:rgba(255,107,168,0.1);transform:scale(1.2);}
+.onboarding-tooltip{
+  display:none;
+  position:absolute;top:calc(100% + 10px);right:0;
+  background:linear-gradient(135deg,#fff0fb,#e8d8ff);
+  border:2px solid rgba(200,125,232,0.4);
+  border-radius:16px;
+  padding:8px 14px;
+  font-size:12px;font-weight:700;color:var(--text);
+  white-space:nowrap;
+  box-shadow:0 4px 16px rgba(200,125,232,0.25);
+  z-index:200;
+  animation:tooltipPop 0.35s var(--ease-spring) both;
+}
+.onboarding-tooltip::before{
+  content:'';
+  position:absolute;bottom:100%;right:14px;
+  border:7px solid transparent;
+  border-bottom-color:rgba(200,125,232,0.4);
+}
+.onboarding-tooltip::after{
+  content:'';
+  position:absolute;bottom:100%;right:16px;
+  border:5px solid transparent;
+  border-bottom-color:#fff0fb;
+}
+@keyframes tooltipPop{
+  0%{opacity:0;transform:scale(0.8) translateY(-4px);}
+  100%{opacity:1;transform:scale(1) translateY(0);}
+}
+@keyframes tooltipBounce{
+  0%,100%{transform:translateY(0);}
+  50%{transform:translateY(-3px);}
+}
+.onboarding-tooltip.visible{
+  display:block;
+  animation:tooltipPop 0.35s var(--ease-spring) both,tooltipBounce 1.8s ease-in-out 0.4s infinite;
+}
 .child-switcher{
   display:flex;align-items:center;gap:6px;
   background:var(--card);
@@ -272,7 +309,7 @@ main{
   margin-bottom:0;
 }
 .stamp{
-  width:35px;height:35px;border-radius:50%;
+  width:40px;height:40px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
   font-size:22px;
   transition:transform 0.3s var(--ease-spring);
@@ -729,7 +766,8 @@ main{
 <nav>
   <div class="nav-inner">
     <a href="#" class="nav-logo">✦ Magical Library ✦</a>
-    <div class="nav-right">
+    <div class="nav-right" style="position:relative;">
+      <div class="onboarding-tooltip" id="onboardingTooltip">🎁 ごほうびを設定してね！</div>
       <button class="nav-btn" title="設定" onclick="openSettings()"><img src="assets/setting/setting.webp" style="width:50px;height:50px;object-fit:contain;"></button>
     </div>
   </div>
@@ -859,14 +897,15 @@ main{
     <!-- ごほうびメモ -->
     <div class="form-group">
       <label class="form-label">🎁 ごほうびメモ</label>
-      <input class="form-input" id="settingReward" type="text" placeholder="アイス！">
+      <div style="font-size:11px;font-weight:700;color:var(--text-sub);margin-bottom:6px;opacity:0.8;">おうちのひとと決めたごほうびのお約束をかこう</div>
+      <input class="form-input" id="settingReward" type="text" placeholder="スタンプ1こでアイス！">
     </div>
 
     <button class="btn-submit" onclick="saveSettings()">保存する ✨</button>
 
     <!-- エクスポート -->
     <div style="margin-top:16px;border-top:2px solid rgba(200,125,232,0.12);padding-top:16px;">
-      <div class="form-label" style="margin-bottom:8px;">📊 読んだ本データ</div>
+      <div class="form-label" style="margin-bottom:8px;">📊 よんだ本データ</div>
       <button class="btn-export" onclick="exportBooks()">スプレッドシート用にコピー 📋</button>
       <div id="exportMsg" style="display:none;text-align:center;font-size:12px;font-weight:700;color:#0a8;margin-top:8px;">コピーしました！✨</div>
     </div>
@@ -972,6 +1011,9 @@ function createChild() {
   document.getElementById('childSetupOverlay').style.display = 'none';
   allChildren = storage.children;
   loadChild(child);
+  // オンボーディング：ごほうびメモ設定を促すツールチップ
+  localStorage.setItem('ml_onboarding_reward', '1');
+  showOnboardingTooltip();
 }
 
 // ===== LOAD DATA =====
@@ -1411,16 +1453,32 @@ const obs = new IntersectionObserver(entries => {
 },{threshold:0.08});
 document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 
+// ===== ONBOARDING TOOLTIP =====
+function showOnboardingTooltip() {
+  const tip = document.getElementById('onboardingTooltip');
+  if (tip) tip.classList.add('visible');
+}
+function hideOnboardingTooltip() {
+  const tip = document.getElementById('onboardingTooltip');
+  if (tip) tip.classList.remove('visible');
+  localStorage.removeItem('ml_onboarding_reward');
+}
+
 // ===== SETTINGS =====
 let selectedSettingAvatar = '🌙';
 
 function openSettings() {
   if (!currentChild) return;
+  const isOnboarding = !!localStorage.getItem('ml_onboarding_reward');
+  hideOnboardingTooltip();
   document.getElementById('settingName').value = currentChild.name;
   document.getElementById('settingReward').value = currentChild.reward_memo || '';
   selectedSettingAvatar = currentChild.avatar_emoji;
   initSettingAvatarPicker();
   document.getElementById('settingsOverlay').classList.add('open');
+  if (isOnboarding) {
+    setTimeout(() => document.getElementById('settingReward').focus(), 300);
+  }
 }
 function closeSettings() { document.getElementById('settingsOverlay').classList.remove('open'); }
 function closeSettingsOutside(e) { if (e.target.id === 'settingsOverlay') closeSettings(); }
@@ -1473,6 +1531,7 @@ function exportBooks() {
 
 // ===== INIT =====
 loadChildren();
+if (localStorage.getItem('ml_onboarding_reward')) showOnboardingTooltip();
 </script>
 </body>
 </html>
