@@ -309,7 +309,7 @@ main{
   margin-bottom:0;
 }
 .stamp{
-  width:38px;height:38px;border-radius:50%;
+  width:clamp(32px, 7vw, 48px);height:clamp(32px, 7vw, 48px);border-radius:50%;
   display:flex;align-items:center;justify-content:center;
   font-size:22px;
   transition:transform 0.3s var(--ease-spring);
@@ -917,7 +917,7 @@ main{
 <div class="confetti-wrap" id="confettiWrap"></div>
 <div class="stamp-overlay" id="stampOverlay">
   <div class="stamp-popup">
-    <span class="popup-emoji">🎖</span>
+    <span class="popup-emoji">💫</span>
     <div class="popup-title">スタンプゲット！</div>
     <div class="popup-sub" id="stampPopupSub">5さつよみきったよ！<br>すごい！✨</div>
     <div class="popup-reward" id="stampRewardBox">
@@ -1089,7 +1089,7 @@ function renderTrack() {
   document.getElementById('goalMsg').innerHTML =
     remain > 0
       ? `あと <strong>${remain}さつ</strong> でスタンプゲット！ 🪄`
-      : '🎖 スタンプゲット！おめでとう！';
+      : '💫 スタンプゲット！おめでとう！';
 }
 
 // ===== RENDER: STAMP CARD =====
@@ -1251,7 +1251,7 @@ function renderTrackAllDone() {
     track.appendChild(slot);
   }
   document.getElementById('goalCount').textContent = `5 / 5 さつ`;
-  document.getElementById('goalMsg').innerHTML = '🎖 スタンプゲット！おめでとう！';
+  document.getElementById('goalMsg').innerHTML = '💫 スタンプゲット！おめでとう！';
 }
 
 // 5冊達成アニメーション本体（終了後にcallback）
