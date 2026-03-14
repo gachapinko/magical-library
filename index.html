@@ -181,7 +181,7 @@ main{
   transition:transform 0.35s var(--ease-spring),filter 0.3s ease;
 }
 .book-img-wrap img{
-  width:120%;height:120%;object-fit:contain;
+  width:130%;height:130%;object-fit:contain;
   transition:inherit;
   user-select:none;pointer-events:none;
 }
@@ -219,8 +219,8 @@ main{
   40% {transform:scale(1.08);filter:brightness(1.7) drop-shadow(0 0 10px #ffe7ff) drop-shadow(0 0 18px #ffd6ff);}
   100%{transform:scale(1);   filter:brightness(1);}
 }
-.book-activate {animation:bookActivate 0.5s ease;}
-.book-full-glow{animation:fullCardGlow 0.45s ease;}
+.book-activate {animation:bookActivate 0.9s ease;}
+.book-full-glow{animation:fullCardGlow 0.8s ease;}
 
 
 /* ゴールメッセージ */
@@ -267,12 +267,12 @@ main{
 
 /* スタンプグリッド */
 .stamp-grid{
-  display:flex;gap:16px;flex-wrap:wrap;
+  display:flex;gap:12px;flex-wrap:wrap;
   justify-content:center;
   margin-bottom:0;
 }
 .stamp{
-  width:48px;height:48px;border-radius:50%;
+  width:60px;height:60px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
   font-size:22px;
   transition:transform 0.3s var(--ease-spring);
@@ -716,7 +716,7 @@ main{
     </div>
     <div class="auth-logo">ようこそ まほう図書館へ</div>
     <p class="auth-sub">おなまえを教えてね 🌸</p>
-    <input class="auth-input" id="childNameInput" type="text" placeholder="例：はなちゃん" maxlength="10">
+    <input class="auth-input" id="childNameInput" type="text" placeholder="例：あい" maxlength="10">
     <div class="avatar-picker" id="avatarPicker"></div>
     <div id="childSetupError" class="auth-error"></div>
     <button class="btn-auth" onclick="createChild()">はじめる！ ✨</button>
@@ -1186,7 +1186,7 @@ function submitBook() {
     const target = wraps[newProg - 1];
     if (target) {
       target.classList.add('book-activate');
-      setTimeout(() => target.classList.remove('book-activate'), 500);
+      setTimeout(() => target.classList.remove('book-activate'), 900);
     }
   }
 }
@@ -1225,9 +1225,9 @@ function animateFullCompletion(callback) {
       setTimeout(() => {
         wraps.forEach(w => w.classList.remove('book-full-glow'));
         callback();
-      }, 450);
+      }, 800);
     }, 100);
-  }, 500);
+  }, 900);
 }
 
 function updateChildStats(prevStamps, storage) {
