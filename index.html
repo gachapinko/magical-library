@@ -258,8 +258,29 @@ main{
   40% {transform:scale(1.08);filter:brightness(1.7) drop-shadow(0 0 10px #ffe7ff) drop-shadow(0 0 18px #ffd6ff);}
   100%{transform:scale(1);   filter:brightness(1);}
 }
-.book-activate {animation:bookActivate 0.9s ease;}
-.book-full-glow{animation:fullCardGlow 0.8s ease;}
+.book-activate {animation:bookActivate 1.5s ease;}
+.book-full-glow{animation:fullCardGlow 1.5s ease;}
+
+@keyframes bookTapPop{
+  0%  {transform:translateY(0)    scale(1)    rotate(0deg);  filter:brightness(1);}
+  35% {transform:translateY(-12px) scale(1.12) rotate(-1.5deg);filter:brightness(1.15) drop-shadow(0 8px 14px rgba(255,210,255,0.4));}
+  65% {transform:translateY(-6px)  scale(1.06) rotate(1deg);  filter:brightness(1.08) drop-shadow(0 6px 10px rgba(255,210,255,0.25));}
+  100%{transform:translateY(0)    scale(1)    rotate(0deg);  filter:brightness(1);}
+}
+@keyframes bookTapPopDone{
+  0%  {transform:translateY(0)    scale(1)    rotate(0deg);  filter:brightness(1)  drop-shadow(0 6px 10px rgba(200,125,232,0.4));}
+  35% {transform:translateY(-14px) scale(1.14) rotate(-2deg);  filter:brightness(1.2) drop-shadow(0 10px 18px rgba(255,160,255,0.55));}
+  65% {transform:translateY(-7px)  scale(1.08) rotate(1.5deg);filter:brightness(1.12) drop-shadow(0 8px 12px rgba(255,160,255,0.4));}
+  100%{transform:translateY(0)    scale(1)    rotate(0deg);  filter:brightness(1)  drop-shadow(0 6px 10px rgba(200,125,232,0.4));}
+}
+@keyframes tinySparkle{
+  0%  {opacity:0;transform:scale(0.6) translateY(0);}
+  35% {opacity:1;transform:scale(1)   translateY(-3px);}
+  100%{opacity:0;transform:scale(0.7) translateY(-10px);}
+}
+.book-pop     {animation:bookTapPop     0.55s cubic-bezier(0.22,1,0.36,1);position:relative;z-index:2;}
+.book-pop-done{animation:bookTapPopDone 0.55s cubic-bezier(0.22,1,0.36,1);position:relative;z-index:2;}
+.book-sparkle{position:absolute;pointer-events:none;font-size:10px;animation:tinySparkle 0.45s ease-out forwards;filter:drop-shadow(0 0 5px rgba(255,200,255,0.8));}
 
 
 /* ゴールメッセージ */
@@ -675,15 +696,18 @@ main{
 }
 .levelup-stats strong{font-size:20px;font-weight:900;color:#b07800;}
 
-/* confetti */
+/* magic sparkles */
 .confetti-wrap{position:fixed;inset:0;pointer-events:none;z-index:490;}
-.confetti-piece{
-  position:absolute;border-radius:2px;
-  animation:confettiFall linear forwards;
+@keyframes magicSparkle{
+  0%  {opacity:0;  transform:translateY(6px)  scale(0.5);}
+  25% {opacity:1;  transform:translateY(0px)  scale(1);}
+  70% {opacity:0.8;transform:translateY(-12px) scale(0.85);}
+  100%{opacity:0;  transform:translateY(-22px) scale(0.5);}
 }
-@keyframes confettiFall{
-  0%{transform:translateY(-20px) rotate(0deg);opacity:1;}
-  100%{transform:translateY(100vh) rotate(720deg);opacity:0;}
+.magic-sparkle{
+  position:absolute;pointer-events:none;
+  animation:magicSparkle ease-out forwards;
+  filter:drop-shadow(0 0 6px rgba(255,210,255,1)) drop-shadow(0 0 12px rgba(255,180,255,0.7));
 }
 
 /* ===== REVEAL ===== */
@@ -1178,6 +1202,8 @@ function renderTrack() {
     img.src = BOOK_IMGS[i];
     img.alt = `まほうの本 ${i+1}`;
     wrap.appendChild(img);
+    wrap.style.cursor = 'pointer';
+    wrap.addEventListener('click', () => animateBookTap(wrap, done));
     slot.append(wrap);
     track.appendChild(slot);
   }
@@ -1332,7 +1358,7 @@ function submitBook() {
     const target = wraps[newProg - 1];
     if (target) {
       target.classList.add('book-activate');
-      setTimeout(() => target.classList.remove('book-activate'), 900);
+      setTimeout(() => target.classList.remove('book-activate'), 1500);
     }
     if (leveledUp) setTimeout(() => showLevelUp(newLevelTitle, newTotal, name), 600);
   }
@@ -1372,9 +1398,9 @@ function animateFullCompletion(callback) {
       setTimeout(() => {
         wraps.forEach(w => w.classList.remove('book-full-glow'));
         callback();
-      }, 800);
+      }, 1500);
     }, 100);
-  }, 900);
+  }, 1500);
 }
 
 function updateChildStats(prevStamps, storage) {
@@ -1538,17 +1564,54 @@ function closeLevelUpOverlay() {
   document.getElementById('confettiWrap').innerHTML = '';
 }
 
+// ===== BOOK TAP ANIMATION =====
+function animateBookTap(wrap, isDone) {
+  const cls = isDone ? 'book-pop-done' : 'book-pop';
+  wrap.classList.remove('book-pop', 'book-pop-done');
+  void wrap.offsetWidth;
+  wrap.classList.add(cls);
+  if (isDone) spawnBookSparkles(wrap);
+  setTimeout(() => wrap.classList.remove(cls), 560);
+}
+function spawnBookSparkles(container) {
+  const sparkles = ['✦', '✧', '⋆'];
+  const positions = [{left:'18%',top:'5%'},{left:'72%',top:'8%'},{left:'45%',top:'0%'}];
+  positions.forEach((pos, i) => {
+    const s = document.createElement('span');
+    s.className = 'book-sparkle';
+    s.textContent = sparkles[i % sparkles.length];
+    s.style.left = pos.left;
+    s.style.top  = pos.top;
+    s.style.animationDelay = `${i * 0.07}s`;
+    container.appendChild(s);
+    setTimeout(() => s.remove(), 500);
+  });
+}
+
 // ===== CONFETTI =====
 function launchConfetti(n) {
   const wrap = document.getElementById('confettiWrap');
   wrap.innerHTML = '';
-  const cols = ['#FF6BA8','#C87DE8','#FFD700','#7FE0CE','#89C4F4','#FF8C7A','#FFB7D5'];
-  for (let i=0;i<n;i++) {
-    const p = document.createElement('div');
-    p.className = 'confetti-piece';
-    const size = 6+Math.random()*8;
-    p.style.cssText = `left:${Math.random()*100}%;background:${cols[Math.floor(Math.random()*cols.length)]};width:${size}px;height:${size}px;border-radius:${Math.random()>.5?'50%':'2px'};animation-duration:${1.5+Math.random()*2}s;animation-delay:${Math.random()*0.6}s;`;
-    wrap.appendChild(p);
+  const stars = ['✦','✧','✨','⋆','✦','✧'];
+  const colors = ['#FFB7D5','#E8CAFF','#B8D4FF','#FFE8B0','#C4F0E8','#FFFFFF','#FFD6F5'];
+  const waves = 4;
+  const perWave = 7;
+  for (let wave = 0; wave < waves; wave++) {
+    for (let i = 0; i < perWave; i++) {
+      const p = document.createElement('span');
+      p.className = 'magic-sparkle';
+      p.textContent = stars[Math.floor(Math.random() * stars.length)];
+      const angle = Math.random() * 360;
+      const radius = 50 + Math.random() * 180;
+      const cx = 50 + Math.cos(angle * Math.PI / 180) * radius / window.innerWidth * 100;
+      const cy = 50 + Math.sin(angle * Math.PI / 180) * radius / window.innerHeight * 100;
+      const size = 10 + Math.random() * 18;
+      const dur  = 1.1 + Math.random() * 0.8;
+      const delay = wave * 0.22 + Math.random() * 0.15;
+      p.style.cssText = `left:${cx}%;top:${cy}%;font-size:${size}px;color:${colors[Math.floor(Math.random()*colors.length)]};animation-duration:${dur}s;animation-delay:${delay}s;`;
+      wrap.appendChild(p);
+      setTimeout(() => p.remove(), (dur + delay + 0.1) * 1000);
+    }
   }
 }
 
