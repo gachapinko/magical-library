@@ -636,6 +636,45 @@ main{
 }
 .btn-popup:hover{transform:scale(1.04);}
 
+/* ===== LEVEL UP OVERLAY ===== */
+.levelup-overlay{
+  position:fixed;inset:0;z-index:401;
+  background:rgba(74,46,74,0.55);backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity 0.4s ease;
+}
+.levelup-overlay.open{opacity:1;pointer-events:all;}
+.levelup-popup{
+  background:linear-gradient(150deg,#FFFBEC,#FFF4E0,#FFF0F8);
+  border-radius:28px;padding:32px 24px 28px;
+  text-align:center;max-width:320px;width:90%;
+  box-shadow:0 8px 0 rgba(200,160,0,0.25),0 24px 60px rgba(255,180,0,0.2);
+  transform:scale(0.6);
+  transition:transform 0.5s var(--ease-spring);
+  position:relative;overflow:hidden;
+}
+.levelup-overlay.open .levelup-popup{transform:scale(1);}
+.levelup-popup::before{
+  content:'';position:absolute;top:4px;left:8px;right:8px;height:24%;
+  background:linear-gradient(180deg,rgba(255,255,255,0.55) 0%,transparent 100%);
+  border-radius:22px 22px 0 0;pointer-events:none;
+}
+.levelup-img{width:100px;height:100px;object-fit:contain;display:block;margin:0 auto 10px;animation:popBounce 0.6s var(--ease-spring) 0.1s both;}
+.levelup-badge{
+  display:inline-block;
+  background:var(--grad-gold);color:#5a3800;
+  font-size:11px;font-weight:900;letter-spacing:0.1em;
+  border-radius:999px;padding:3px 12px;margin-bottom:10px;
+  animation:popBounce 0.5s var(--ease-spring) 0.25s both;
+}
+.levelup-level{font-weight:900;font-size:26px;background:var(--grad-gold);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;animation:popBounce 0.5s var(--ease-spring) 0.35s both;}
+.levelup-title-text{font-weight:900;font-size:16px;color:var(--text);margin-bottom:14px;animation:popBounce 0.5s var(--ease-spring) 0.4s both;}
+.levelup-stats{
+  background:rgba(255,215,0,0.12);border-radius:16px;padding:12px 16px;margin-bottom:18px;
+  font-size:13px;font-weight:700;color:var(--text-sub);line-height:1.8;
+}
+.levelup-stats strong{font-size:20px;font-weight:900;color:#b07800;}
+
 /* confetti */
 .confetti-wrap{position:fixed;inset:0;pointer-events:none;z-index:490;}
 .confetti-piece{
@@ -957,6 +996,21 @@ main{
   </div>
 </div>
 
+<!-- LEVEL UP OVERLAY -->
+<div class="levelup-overlay" id="levelupOverlay">
+  <div class="levelup-popup">
+    <img class="levelup-img" src="assets/intro.webp" alt="✨">
+    <div class="levelup-badge">⭐ レベルアップ！</div>
+    <div class="levelup-level" id="levelupLevel">レベル2</div>
+    <div class="levelup-title-text" id="levelupTitleText">ほしよみ師</div>
+    <div class="levelup-stats">
+      <span id="levelupName">○○</span>さんは<br>
+      よんだほんが <strong id="levelupBooks">0</strong>さつに なったよ！
+    </div>
+    <button class="btn-popup" onclick="closeLevelUpOverlay()">やったー！ ✨</button>
+  </div>
+</div>
+
 <!-- STAMP GET OVERLAY -->
 <div class="confetti-wrap" id="confettiWrap"></div>
 <div class="stamp-overlay" id="stampOverlay">
@@ -1247,17 +1301,23 @@ function submitBook() {
 
   // 新規記録
   const prevStamps = getStampCount();
+  const prevTotalForLevel = books.length; // push前の冊数
+  const prevLevelTitle = getTitle(prevTotalForLevel);
   const book = { id: Date.now().toString(), child_id: currentChild.id, title, author, impression };
   books.push(book);
   storage.books[currentChild.id] = books;
   saveStorage(storage);
   const { newStamps } = updateChildStats(prevStamps, storage);
   const isFullComplete = newStamps > prevStamps;
+  const newTotal = books.length;
+  const newLevelTitle = getTitle(newTotal);
+  const leveledUp = getLevelNum(newLevelTitle) > getLevelNum(prevLevelTitle);
+  const name = currentChild ? currentChild.name : '';
   closeModal();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
   if (isFullComplete) {
-    // 5冊達成：全スロットをdoneで描画してアニメーション → renderAll → popup
+    if (leveledUp) pendingLevelUpData = { title: newLevelTitle, total: newTotal, name };
     renderTrackAllDone();
     renderStampCard();
     renderBooks();
@@ -1266,7 +1326,6 @@ function submitBook() {
       showStampGet(newStamps);
     });
   } else {
-    // 通常：renderAll後に新しく点灯したスロットをアニメーション
     renderAll();
     const newProg = getProgress();
     const wraps = document.getElementById('bookTrack').querySelectorAll('.book-img-wrap');
@@ -1275,6 +1334,7 @@ function submitBook() {
       target.classList.add('book-activate');
       setTimeout(() => target.classList.remove('book-activate'), 900);
     }
+    if (leveledUp) setTimeout(() => showLevelUp(newLevelTitle, newTotal, name), 600);
   }
 }
 
@@ -1442,6 +1502,8 @@ function editBook(id, e) {
 }
 
 // ===== STAMP GET =====
+let pendingLevelUpData = null;
+
 function showStampGet(stamps) {
   const name = currentChild ? currentChild.name : '';
   document.getElementById('stampPopupSub').innerHTML = `5さつよみきったよ！<br>すごい！${name}さん ✨`;
@@ -1451,6 +1513,28 @@ function showStampGet(stamps) {
 }
 function closeStampOverlay() {
   document.getElementById('stampOverlay').classList.remove('open');
+  document.getElementById('confettiWrap').innerHTML = '';
+  if (pendingLevelUpData) {
+    const d = pendingLevelUpData;
+    pendingLevelUpData = null;
+    setTimeout(() => showLevelUp(d.title, d.total, d.name), 350);
+  }
+}
+
+// ===== LEVEL UP =====
+function getLevelNum(title) { return parseInt(title.match(/レベル(\d+)/)?.[1] || '1'); }
+
+function showLevelUp(fullTitle, total, name) {
+  const parts = fullTitle.split(' ');
+  document.getElementById('levelupLevel').textContent = parts[0];
+  document.getElementById('levelupTitleText').textContent = parts.slice(1).join(' ');
+  document.getElementById('levelupBooks').textContent = total;
+  document.getElementById('levelupName').textContent = name;
+  document.getElementById('levelupOverlay').classList.add('open');
+  launchConfetti(60);
+}
+function closeLevelUpOverlay() {
+  document.getElementById('levelupOverlay').classList.remove('open');
   document.getElementById('confettiWrap').innerHTML = '';
 }
 
