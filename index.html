@@ -1533,6 +1533,45 @@ function exportBooks() {
 // ===== INIT =====
 loadChildren();
 if (localStorage.getItem('ml_onboarding_reward')) showOnboardingTooltip();
+
+// ===== SWIPE TO DISMISS =====
+function initSwipeToDismiss(overlayId, closeFn) {
+  const overlay = document.getElementById(overlayId);
+  const modal = overlay.querySelector('.modal');
+  let startY = 0, dragY = 0, dragging = false;
+
+  modal.addEventListener('touchstart', e => {
+    if (modal.scrollTop > 0) return;
+    startY = e.touches[0].clientY;
+    dragging = true;
+    modal.style.transition = 'none';
+  }, { passive: true });
+
+  modal.addEventListener('touchmove', e => {
+    if (!dragging) return;
+    if (modal.scrollTop > 0) { dragging = false; modal.style.transition = ''; return; }
+    dragY = e.touches[0].clientY - startY;
+    if (dragY < 0) return;
+    modal.style.transform = `translateY(${dragY}px)`;
+  }, { passive: true });
+
+  modal.addEventListener('touchend', () => {
+    if (!dragging) return;
+    dragging = false;
+    modal.style.transition = '';
+    if (dragY > 100) {
+      modal.style.transform = 'translateY(100%)';
+      setTimeout(() => { modal.style.transform = ''; closeFn(); }, 300);
+    } else {
+      modal.style.transform = '';
+    }
+    dragY = 0;
+  });
+}
+
+initSwipeToDismiss('modalOverlay', closeModal);
+initSwipeToDismiss('consumeOverlay', closeConsumeModal);
+initSwipeToDismiss('settingsOverlay', closeSettings);
 </script>
 </body>
 </html>
