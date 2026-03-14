@@ -1,0 +1,20 @@
+{
+  "name": "まほう図書館",
+  "short_name": "まほう図書館",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#E8A8FF",
+  "theme_color": "#E8A8FF",
+  "icons": [
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
