@@ -1405,31 +1405,43 @@ function renderTrackAllDone() {
 }
 
 // 5冊達成アニメーション本体（終了後にcallback）
-// CSS classではなくWeb Animations APIを使用（モバイルSafari対応）
+// インラインstyle + rAF でモバイルSafariでも確実に動作させる
 function animateFullCompletion(callback) {
   requestAnimationFrame(() => requestAnimationFrame(() => {
     const wraps = Array.from(document.getElementById('bookTrack').querySelectorAll('.book-img-wrap'));
     const last = wraps[BOOK_GOAL - 1];
 
     // Step1: 5冊目を点灯
-    last.animate([
-      { transform: 'scale(1)',    filter: 'brightness(1)' },
-      { transform: 'scale(1.15)', filter: 'brightness(1.6) drop-shadow(0 0 12px #ffd6ff)' },
-      { transform: 'scale(1)',    filter: 'brightness(1)' }
-    ], { duration: 1500, easing: 'ease' }).onfinish = () => {
+    last.style.animation = 'none';
+    last.style.webkitAnimation = 'none';
+    requestAnimationFrame(() => {
+      last.style.animation = 'bookActivate 1.5s ease';
+      last.style.webkitAnimation = 'bookActivate 1.5s ease';
 
-      // Step2: 全5冊グロー
-      let done = 0;
-      wraps.forEach(w => {
-        w.animate([
-          { transform: 'scale(1)',    filter: 'brightness(1)', offset: 0 },
-          { transform: 'scale(1.08)', filter: 'brightness(1.7) drop-shadow(0 0 10px #ffe7ff) drop-shadow(0 0 18px #ffd6ff)', offset: 0.4 },
-          { transform: 'scale(1)',    filter: 'brightness(1)', offset: 1 }
-        ], { duration: 1500, easing: 'ease' }).onfinish = () => {
-          if (++done === wraps.length) callback();
-        };
-      });
-    };
+      setTimeout(() => {
+        last.style.animation = '';
+        last.style.webkitAnimation = '';
+
+        // Step2: 全5冊グロー
+        wraps.forEach(w => {
+          w.style.animation = 'none';
+          w.style.webkitAnimation = 'none';
+        });
+        requestAnimationFrame(() => {
+          wraps.forEach(w => {
+            w.style.animation = 'fullCardGlow 1.5s ease';
+            w.style.webkitAnimation = 'fullCardGlow 1.5s ease';
+          });
+          setTimeout(() => {
+            wraps.forEach(w => {
+              w.style.animation = '';
+              w.style.webkitAnimation = '';
+            });
+            callback();
+          }, 1500);
+        });
+      }, 1500);
+    });
   }));
 }
 
