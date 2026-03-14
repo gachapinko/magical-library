@@ -152,7 +152,7 @@ main{
   border:1px solid rgba(255,255,255,0.5);
   color:white;font-size:11px;font-weight:700;
   padding:3px 10px;border-radius:999px;
-  letter-spacing:0.06em;margin-top:4px;
+  letter-spacing:0.06em;
 }
 
 /* === 本トラック === */
@@ -253,7 +253,7 @@ main{
 
 /* スタンプグリッド */
 .stamp-grid{
-  display:flex;gap:8px;flex-wrap:wrap;
+  display:flex;gap:12px;flex-wrap:wrap;
   justify-content:center;
   margin-bottom:0;
 }
@@ -310,12 +310,13 @@ main{
 .stamp-header-right{display:flex;align-items:stretch;gap:8px;}
 .star-badge{
   display:flex;align-items:center;gap:4px;
-  background:rgba(200,125,232,0.07);
-  border:1px solid rgba(200,125,232,0.18);
+  background:rgba(255,255,255,0.35);
+  backdrop-filter:blur(4px);
+  border:1px solid rgba(255,255,255,0.5);
   border-radius:999px;padding:3px 9px 3px 5px;
 }
-.star-badge-img{width:16px;height:16px;object-fit:contain;opacity:0.6;}
-.star-badge-num{font-weight:700;font-size:12px;color:var(--text-lt);min-width:14px;text-align:center;}
+.star-badge-img{width:14px;height:14px;object-fit:contain;}
+.star-badge-num{font-weight:700;font-size:11px;color:white;min-width:12px;text-align:center;letter-spacing:0.04em;}
 @keyframes badgePop{
   0%{transform:scale(1);}50%{transform:scale(1.2);}100%{transform:scale(1);}
 }
@@ -688,7 +689,13 @@ main{
       <div class="child-avatar-big" id="heroAvatar">🌸</div>
       <div>
         <div class="child-name-big" id="heroName">はなちゃん</div>
-        <div class="child-title" id="heroTitle">⭐ レベル3 ／ ほしよみ師</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+          <div class="child-title" id="heroTitle">レベル3 ／ ほしよみ師</div>
+          <div class="star-badge" id="starBadge">
+            <img class="star-badge-img" id="starBadgeImg" src="assets/stamps/star.webp" alt="">
+            <span class="star-badge-num" id="starBadgeNum">0</span>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -704,13 +711,7 @@ main{
   <div class="stamp-card reveal" style="transition-delay:0.06s">
     <div class="stamp-header">
       <div class="stamp-title">🎖 スタンプカード</div>
-      <div class="stamp-header-right">
-        <div class="star-badge" id="starBadge">
-          <img class="star-badge-img" id="starBadgeImg" src="assets/stamps/star.webp" alt="">
-          <span class="star-badge-num" id="starBadgeNum">0</span>
-        </div>
-        <div class="stamp-reward-preview" id="rewardPreview">🎁 スタンプ1こでアイス！</div>
-      </div>
+      <div class="stamp-reward-preview" id="rewardPreview">🎁 スタンプ1こでアイス！</div>
     </div>
     <div class="stamp-grid" id="stampGrid"></div>
   </div>
@@ -856,7 +857,7 @@ let currentChild = null;
 let allChildren = [];
 let books = [];
 let STAMP_GOAL = 5;
-const STAMP_DISPLAY = 6;
+const STAMP_DISPLAY = 5;
 let REWARD_MEMO = '';
 let editingId = null;
 let selectedAvatar = '🌙';
@@ -950,16 +951,16 @@ function renderChildInfo() {
   document.getElementById('longestStreakNum').innerHTML = `${c.longest_streak}<span>にち</span>`;
 }
 function getTitle(total) {
-  if (total >= 300) return '⭐ レベル10 ／ えいえんの書の大魔導士'; 
-  if (total >= 200) return '⭐ レベル9 ／ ぎんが図書館の賢者'; 
-  if (total >= 150) return '⭐ レベル8 ／ 月の書の守り手'; 
-  if (total >= 100) return '⭐ レベル7 ／ 星の書の読み手'; 
-  if (total >= 50) return '⭐ レベル6 ／ まほう図書館の司書';
-  if (total >= 30) return '⭐ レベル5 ／ でんせつの書の読み手'; 
-  if (total >= 20) return '⭐ レベル4 ／ ほんのまじょ'; 
-  if (total >= 10) return '⭐ レベル3 ／ まほうよみ'; 
-  if (total >= 5) return '⭐ レベル2 ／ ほしよみ師';  
-  return '⭐ レベル1 ／ みならい読書家';
+  if (total >= 300) return 'レベル10 ／ えいえんの書の大魔導士'; 
+  if (total >= 200) return 'レベル9 ／ ぎんが図書館の賢者'; 
+  if (total >= 150) return 'レベル8 ／ 月の書の守り手'; 
+  if (total >= 100) return 'レベル7 ／ 星の書の読み手'; 
+  if (total >= 50) return 'レベル6 ／ まほう図書館の司書';
+  if (total >= 30) return 'レベル5 ／ でんせつの書の読み手'; 
+  if (total >= 20) return 'レベル4 ／ ほんのまじょ'; 
+  if (total >= 10) return 'レベル3 ／ まほうよみ'; 
+  if (total >= 5) return 'レベル2 ／ ほしよみ師';  
+  return 'レベル1 ／ みならい読書家';
 }
 function switchChild() {
   if (allChildren.length < 2) return;
@@ -1182,15 +1183,16 @@ async function consumeStamp(stampEl) {
   document.body.appendChild(clone);
   stampEl.style.opacity = '0';
 
-  const dx = (dstRect.left + dstRect.width/2 - 8) - (srcRect.left + srcRect.width/2 - 24);
-  const dy = (dstRect.top + dstRect.height/2 - 8) - (srcRect.top + srcRect.height/2 - 24);
+  // クローン中心→バッジ中心への移動量
+  const dx = (dstRect.left + dstRect.width/2) - (srcRect.left + srcRect.width/2);
+  const dy = (dstRect.top + dstRect.height/2) - (srcRect.top + srcRect.height/2);
 
-  // 弧を描いて飛ぶ（ネストした2要素でX/Yを別々にアニメーション）
+  // translate を先にすることでスケール倍率の影響を受けずに正しい距離を移動する
   clone.animate([
-    { transform: 'scale(0.72) translate(0px, 0px)', opacity: 1 },
-    { transform: `scale(0.55) translate(${dx*0.5}px, ${dy*0.5 - 38}px)`, opacity: 1 },
-    { transform: `scale(0.38) translate(${dx}px, ${dy}px)`, opacity: 0.8 },
-  ], { duration: 460, easing: 'cubic-bezier(0.4,0,0.2,1)', fill: 'forwards' });
+    { transform: 'translate(0px, 0px) scale(0.72)', opacity: 1 },
+    { transform: `translate(${dx*0.5}px, ${dy*0.5 - 40}px) scale(0.55)`, opacity: 1 },
+    { transform: `translate(${dx}px, ${dy}px) scale(0.38)`, opacity: 0.8 },
+  ], { duration: 500, easing: 'cubic-bezier(0.4,0,0.2,1)', fill: 'forwards' });
 
   await wait(420);
 
