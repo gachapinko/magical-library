@@ -964,10 +964,10 @@ function getProgress()     { return getTotalBooks() % BOOK_GOAL; }
 function getStampCount()   { return currentChild ? currentChild.stamp_count : 0; }
 function getStampProgress(){
   const sc = getStampCount();
-  const currentRound = Math.floor(sc / STAMP_GOAL);
-  const usedInRound = (currentChild?.used_stamps_round === currentRound)
-    ? (currentChild?.used_stamps_current ?? 0) : 0;
-  return Math.max(0, sc % STAMP_GOAL - usedInRound);
+  const totalUsed = currentChild?.used_stamps ?? 0;
+  const inHand = Math.max(0, sc - totalUsed);
+  const rem = inHand % STAMP_GOAL;
+  return rem === 0 && inHand > 0 ? STAMP_GOAL : rem;
 }
 
 // ===== CHILD SETUP =====
