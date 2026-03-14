@@ -229,8 +229,10 @@ main{
   filter:drop-shadow(0 6px 10px rgba(200,125,232,0.4));
   opacity:1;
 }
-.book-slot:hover .book-img-wrap.done{transform:translateY(-8px) rotate(-5deg) scale(1.08);}
-.book-slot:hover .book-img-wrap.current{transform:translateY(-6px) scale(1.06);}
+@media(hover:hover){
+  .book-slot:hover .book-img-wrap.done{transform:translateY(-8px) rotate(-5deg) scale(1.08);}
+  .book-slot:hover .book-img-wrap.current{transform:translateY(-6px) scale(1.06);}
+}
 
 /* 次に読む枠: グレー＋金グロー（まだ読んでいない） */
 .book-img-wrap.current img{
