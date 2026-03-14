@@ -92,13 +92,13 @@ nav{
 .onboarding-tooltip{
   display:none;
   position:absolute;top:calc(100% + 10px);right:0;
-  background:linear-gradient(135deg,#fff0fb,#e8d8ff);
-  border:2px solid rgba(200,125,232,0.4);
+  background:linear-gradient(135deg,#e8f7ff,#d0effa);
+  border:2px solid rgba(137,196,244,0.5);
   border-radius:16px;
   padding:8px 14px;
-  font-size:12px;font-weight:700;color:var(--text);
+  font-size:12px;font-weight:700;color:#2a7aa0;
   white-space:nowrap;
-  box-shadow:0 4px 16px rgba(200,125,232,0.25);
+  box-shadow:0 4px 16px rgba(137,196,244,0.3);
   z-index:200;
   animation:tooltipPop 0.35s var(--ease-spring) both;
 }
@@ -106,13 +106,13 @@ nav{
   content:'';
   position:absolute;bottom:100%;right:14px;
   border:7px solid transparent;
-  border-bottom-color:rgba(200,125,232,0.4);
+  border-bottom-color:rgba(137,196,244,0.5);
 }
 .onboarding-tooltip::after{
   content:'';
   position:absolute;bottom:100%;right:16px;
   border:5px solid transparent;
-  border-bottom-color:#fff0fb;
+  border-bottom-color:#e8f7ff;
 }
 @keyframes tooltipPop{
   0%{opacity:0;transform:scale(0.8) translateY(-4px);}
@@ -766,7 +766,7 @@ main{
   <div class="nav-inner">
     <a href="#" class="nav-logo">✦ Magical Library ✦</a>
     <div class="nav-right" style="position:relative;">
-      <div class="onboarding-tooltip" id="onboardingTooltip">🔮 ごほうびを設定してね！</div>
+      <div class="onboarding-tooltip" id="onboardingTooltip">🔮 ごほうびをきめよう</div>
       <button class="nav-btn" title="せってい" onclick="openSettings()"><img src="assets/setting/setting.webp" style="width:50px;height:50px;object-fit:contain;"></button>
     </div>
   </div>
