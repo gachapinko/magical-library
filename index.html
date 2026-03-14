@@ -767,7 +767,7 @@ main{
   <div class="nav-inner">
     <a href="#" class="nav-logo">✦ Magical Library ✦</a>
     <div class="nav-right" style="position:relative;">
-      <div class="onboarding-tooltip" id="onboardingTooltip">🎁 ごほうびを設定してね！</div>
+      <div class="onboarding-tooltip" id="onboardingTooltip">💝 ごほうびを設定してね！</div>
       <button class="nav-btn" title="せってい" onclick="openSettings()"><img src="assets/setting/setting.webp" style="width:50px;height:50px;object-fit:contain;"></button>
     </div>
   </div>
@@ -803,7 +803,7 @@ main{
   <div class="stamp-card reveal" style="transition-delay:0.06s">
     <div class="stamp-header">
       <div class="stamp-title">💫 ごほうびスタンプ</div>
-      <div class="stamp-reward-preview" id="rewardPreview">🎁 スタンプ1こでアイス！</div>
+      <div class="stamp-reward-preview" id="rewardPreview">💝 スタンプ1こでアイス！</div>
     </div>
     <div class="stamp-grid" id="stampGrid"></div>
   </div>
@@ -896,7 +896,7 @@ main{
 
     <!-- ごほうびメモ -->
     <div class="form-group">
-      <label class="form-label">🎁 ごほうびメモ</label>
+      <label class="form-label">💝 ごほうびメモ</label>
       <div style="font-size:11px;font-weight:700;color:var(--text-sub);margin-bottom:6px;opacity:0.8;">おうちのひとと決めたごほうびのお約束をかこう</div>
       <input class="form-input" id="settingReward" type="text" placeholder="スタンプ1こでアイス！">
     </div>
@@ -920,7 +920,7 @@ main{
     <div class="popup-title">スタンプゲット！</div>
     <div class="popup-sub" id="stampPopupSub">5さつよみきったよ！<br>すごい！✨</div>
     <div class="popup-reward" id="stampRewardBox">
-      <div class="popup-reward-label">🎁 ごほうびのめやす</div>
+      <div class="popup-reward-label">💝 ごほうびのめやす</div>
       <div id="stampRewardMemo">スタンプ1個でお菓子</div>
     </div>
     <button class="btn-popup" onclick="closeStampOverlay()">また5さつ目指すぞ！ ✦</button>
@@ -1115,7 +1115,7 @@ function renderStampCard() {
     grid.appendChild(el);
   }
 
-  document.getElementById('rewardPreview').textContent = `🎁 ${REWARD_MEMO}`;
+  document.getElementById('rewardPreview').textContent = `💝 ${REWARD_MEMO}`;
 }
 
 
@@ -1299,7 +1299,7 @@ function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 function openConsumeModal(stampEl) {
   pendingConsumeStampEl = stampEl;
-  document.getElementById('consumeRewardLabel').textContent = `🎁 ${REWARD_MEMO}`;
+  document.getElementById('consumeRewardLabel').textContent = `💝 ${REWARD_MEMO}`;
   document.getElementById('consumeOverlay').classList.add('open');
 }
 function closeConsumeModal() {
