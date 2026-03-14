@@ -848,7 +848,7 @@ main{
       <div>
         <div class="child-name-big" id="heroName">はなちゃん</div>
         <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
-          <div class="child-title" id="heroTitle">レベル1 みならい読書家</div>
+          <div class="child-title" id="heroTitle">レベル1 まほう図書館みならい</div>
           <div class="star-badge" id="starBadge">
             <img class="star-badge-img" id="starBadgeImg" src="assets/stamps/star.webp" alt="">
             <span class="star-badge-num" id="starBadgeNum">0</span>
@@ -1151,10 +1151,10 @@ function getTitle(total) {
   if (total >= 100) return 'レベル7 星の書の読み手';
   if (total >= 50) return 'レベル6 まほう図書館の司書';
   if (total >= 30) return 'レベル5 でんせつの書の読み手';
-  if (total >= 20) return 'レベル4 ほんのまじょ';
-  if (total >= 10) return 'レベル3 まほうよみ';
-  if (total >= 5) return 'レベル2 ほしよみ師';
-  return 'レベル1 みならい読書家';
+  if (total >= 20) return 'レベル4 ほんの魔法使い';
+  if (total >= 10) return 'レベル3 まほうの書の読み手';
+  if (total >= 5) return 'レベル2 ちいさな魔法使い';
+  return 'レベル1 まほう図書館みならい';
 }
 function switchChild() {
   if (allChildren.length < 2) return;
