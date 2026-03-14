@@ -1552,8 +1552,9 @@ function initSwipeToDismiss(overlayId, closeFn) {
     if (modal.scrollTop > 0) { dragging = false; modal.style.transition = ''; return; }
     dragY = e.touches[0].clientY - startY;
     if (dragY < 0) return;
+    e.preventDefault();
     modal.style.transform = `translateY(${dragY}px)`;
-  }, { passive: true });
+  }, { passive: false });
 
   modal.addEventListener('touchend', () => {
     if (!dragging) return;
