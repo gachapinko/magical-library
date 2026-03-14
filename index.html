@@ -1387,8 +1387,19 @@ function submitBook() {
     const wraps = document.getElementById('bookTrack').querySelectorAll('.book-img-wrap');
     const target = wraps[newProg - 1];
     if (target) {
-      target.classList.add('book-activate');
-      setTimeout(() => target.classList.remove('book-activate'), 1500);
+      const img = target.querySelector('img');
+      target.style.transition = 'none';
+      target.style.animation = 'none';
+      if (img) { img.style.transition = 'none'; img.style.animation = 'none'; }
+      requestAnimationFrame(() => {
+        target.style.animation = 'bookActivate 1.5s ease';
+        if (img) img.style.animation = 'bookActivateFilter 1.5s ease';
+        setTimeout(() => {
+          target.style.animation = '';
+          target.style.transition = '';
+          if (img) { img.style.animation = ''; img.style.transition = ''; }
+        }, 1500);
+      });
     }
     if (leveledUp) setTimeout(() => showLevelUp(newLevelTitle, newTotal, name), 600);
   }
