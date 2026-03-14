@@ -593,11 +593,11 @@ main{
 .popup-title{font-weight:900;font-size:22px;color:var(--text);margin-bottom:8px;}
 .popup-sub{font-size:14px;color:var(--text-sub);line-height:1.7;margin-bottom:6px;}
 .popup-reward{
-  background:rgba(255,215,0,0.15);border:2px solid rgba(255,215,0,0.3);
+  background:rgba(127,224,206,0.15);border:2px solid rgba(127,224,206,0.35);
   border-radius:16px;padding:12px 16px;margin:16px 0;
-  font-size:14px;font-weight:700;color:#806000;
+  font-size:14px;font-weight:700;color:#1a7a6e;
 }
-.popup-reward-label{font-size:11px;font-weight:700;color:var(--acc-gold);margin-bottom:4px;letter-spacing:0.06em;}
+.popup-reward-label{font-size:11px;font-weight:700;color:#2aada0;margin-bottom:4px;letter-spacing:0.06em;}
 .btn-popup{
   width:100%;
   background:var(--grad-main);color:white;border:none;border-radius:999px;
@@ -751,7 +751,7 @@ main{
       <span class="sparkle sparkle-2">✦</span>
       <span class="sparkle sparkle-3">✦</span>
     </div>
-    <div class="auth-logo">ようこそ まほう図書館へ</div>
+    <div class="auth-logo">まほう図書館へ ようこそ</div>
     <p class="auth-sub">おなまえを教えてね 🌸</p>
     <input class="auth-input" id="childNameInput" type="text" placeholder="例：あい" maxlength="10">
     <div class="avatar-picker" id="avatarPicker"></div>
@@ -782,7 +782,7 @@ main{
       <div>
         <div class="child-name-big" id="heroName">はなちゃん</div>
         <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
-          <div class="child-title" id="heroTitle">レベル3 ／ ほしよみ師</div>
+          <div class="child-title" id="heroTitle">レベル1 みならい読書家</div>
           <div class="star-badge" id="starBadge">
             <img class="star-badge-img" id="starBadgeImg" src="assets/stamps/star.webp" alt="">
             <span class="star-badge-num" id="starBadgeNum">0</span>
@@ -803,7 +803,7 @@ main{
   <div class="stamp-card reveal" style="transition-delay:0.06s">
     <div class="stamp-header">
       <div class="stamp-title">💫 ごほうびスタンプ</div>
-      <div class="stamp-reward-preview" id="rewardPreview">💝 スタンプ1こでアイス！</div>
+      <div class="stamp-reward-preview" id="rewardPreview" onclick="openSettings()" style="cursor:pointer;">💝 スタンプ1こでアイス！</div>
     </div>
     <div class="stamp-grid" id="stampGrid"></div>
   </div>
@@ -886,11 +886,11 @@ main{
 
     <!-- 子どもの情報 -->
     <div class="form-group">
-      <label class="form-label">なまえ ✦</label>
+      <label class="form-label">✏️ なまえ</label>
       <input class="form-input" id="settingName" type="text" maxlength="10">
     </div>
     <div class="form-group">
-      <label class="form-label">アバター</label>
+      <label class="form-label">🌟 アバター</label>
       <div class="avatar-picker" id="settingAvatarPicker"></div>
     </div>
 
@@ -1048,16 +1048,16 @@ function renderChildInfo() {
   document.getElementById('longestStreakNum').innerHTML = `${c.longest_streak}<span>にち</span>`;
 }
 function getTitle(total) {
-  if (total >= 300) return 'レベル10 ／ えいえんの書の大魔導士'; 
-  if (total >= 200) return 'レベル9 ／ ぎんが図書館の賢者'; 
-  if (total >= 150) return 'レベル8 ／ 月の書の守り手'; 
-  if (total >= 100) return 'レベル7 ／ 星の書の読み手'; 
-  if (total >= 50) return 'レベル6 ／ まほう図書館の司書';
-  if (total >= 30) return 'レベル5 ／ でんせつの書の読み手'; 
-  if (total >= 20) return 'レベル4 ／ ほんのまじょ'; 
-  if (total >= 10) return 'レベル3 ／ まほうよみ'; 
-  if (total >= 5) return 'レベル2 ／ ほしよみ師';  
-  return 'レベル1 ／ みならい読書家';
+  if (total >= 300) return 'レベル10 えいえんの書の大魔導士';
+  if (total >= 200) return 'レベル9 ぎんが図書館の賢者';
+  if (total >= 150) return 'レベル8 月の書の守り手';
+  if (total >= 100) return 'レベル7 星の書の読み手';
+  if (total >= 50) return 'レベル6 まほう図書館の司書';
+  if (total >= 30) return 'レベル5 でんせつの書の読み手';
+  if (total >= 20) return 'レベル4 ほんのまじょ';
+  if (total >= 10) return 'レベル3 まほうよみ';
+  if (total >= 5) return 'レベル2 ほしよみ師';
+  return 'レベル1 みならい読書家';
 }
 function switchChild() {
   if (allChildren.length < 2) return;
