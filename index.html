@@ -253,7 +253,7 @@ main{
 
 /* スタンプグリッド */
 .stamp-grid{
-  display:flex;gap:12px;flex-wrap:wrap;
+  display:flex;gap:16px;flex-wrap:wrap;
   justify-content:center;
   margin-bottom:0;
 }
@@ -991,7 +991,7 @@ function renderTrack() {
   document.getElementById('goalCount').textContent = `${prog} / ${BOOK_GOAL} さつ`;
   document.getElementById('goalMsg').innerHTML =
     remain > 0
-      ? `あと <strong>${remain}さつ</strong> でスタンプゲット！ 🎀`
+      ? `あと <strong>${remain}さつ</strong> でスタンプゲット！ 🪽`
       : '🎖 スタンプゲット！おめでとう！';
 }
 
