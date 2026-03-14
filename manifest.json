@@ -2,7 +2,7 @@
   "name": "まほう図書館",
   "short_name": "まほう図書館",
   "start_url": "./index.html",
-  "display": "standalone",
+  "display": "browser",
   "background_color": "#E8A8FF",
   "theme_color": "#E8A8FF",
   "icons": [
