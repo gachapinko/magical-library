@@ -430,7 +430,11 @@ main{
 /* 確認モーダル */
 .consume-modal-msg{
   text-align:center;font-size:15px;color:var(--text-sub);
-  line-height:1.7;margin-bottom:10px;
+  line-height:1.7;margin-bottom:6px;
+}
+.consume-modal-note{
+  text-align:center;font-size:12px;color:var(--text-sub);opacity:0.7;
+  margin-bottom:10px;
 }
 .consume-modal-reward{
   text-align:center;font-weight:700;font-size:14px;
@@ -976,6 +980,7 @@ main{
     <span class="modal-handle"></span>
     <div class="modal-title">スタンプをつかう 💫</div>
     <p class="consume-modal-msg">このスタンプをつかって<br>ごほうびをもらいますか？</p>
+    <p class="consume-modal-note">おうちのひとにかくにんしよう</p>
     <p class="consume-modal-reward" id="consumeRewardLabel"></p>
     <div class="consume-modal-btns">
       <button class="btn-consume-cancel" onclick="closeConsumeModal()">やめる</button>
