@@ -1105,6 +1105,7 @@ function submitBook() {
   if (!title) { document.getElementById('inputTitle').focus(); return; }
   const author     = document.getElementById('inputAuthor').value.trim();
   const impression = document.getElementById('inputImpression').value.trim();
+  if (!impression) { document.getElementById('inputImpression').focus(); return; }
   const storage = loadStorage();
 
   if (editingId) {
