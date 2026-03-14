@@ -489,9 +489,11 @@ main{
 .btn-delete:hover{background:rgba(255,107,107,0.28);transform:scale(1.2);}
 
 /* ===== FAB ===== */
-.fab{
+.fab-wrap{
   position:fixed;bottom:28px;left:50%;transform:translateX(-50%);
-  z-index:200;
+  z-index:200;display:flex;flex-direction:column;align-items:center;gap:8px;
+}
+.fab{
   background:var(--grad-main);color:white;
   font-family:'M PLUS Rounded 1c',sans-serif;
   font-weight:700;font-size:15px;
@@ -500,27 +502,27 @@ main{
   cursor:pointer;letter-spacing:0.05em;white-space:nowrap;
   transition:transform 0.2s var(--ease-spring),box-shadow 0.15s;
 }
-.fab:hover{transform:translateX(-50%) translateY(-4px);box-shadow:0 9px 0 #a0459a,0 14px 36px rgba(255,107,168,0.45);}
-.fab:active{transform:translateX(-50%) translateY(2px);box-shadow:0 3px 0 #a0459a,0 4px 12px rgba(255,107,168,0.3);}
+.fab:hover{transform:translateY(-4px);box-shadow:0 9px 0 #a0459a,0 14px 36px rgba(255,107,168,0.45);}
+.fab:active{transform:translateY(2px);box-shadow:0 3px 0 #a0459a,0 4px 12px rgba(255,107,168,0.3);}
 .fab-tooltip{
   display:none;
-  position:fixed;bottom:96px;left:50%;transform:translateX(-50%);
   background:linear-gradient(135deg,#e8f7ff,#d0effa);
   border:2px solid rgba(137,196,244,0.5);
   border-radius:16px;padding:8px 14px;
   font-size:12px;font-weight:700;color:#2a7aa0;
   white-space:nowrap;
   box-shadow:0 4px 16px rgba(137,196,244,0.3);
-  z-index:199;
+  position:relative;
   animation:tooltipPop 0.35s var(--ease-spring) both;
 }
 .fab-tooltip::after{
   content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
-  border:7px solid transparent;border-top-color:rgba(137,196,244,0.5);
+  border:6px solid transparent;border-top-color:rgba(137,196,244,0.5);
 }
 .fab-tooltip::before{
-  content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:-2px;
-  border:5px solid transparent;border-top-color:#d0effa;z-index:1;
+  content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
+  margin-top:-3px;z-index:1;
+  border:4px solid transparent;border-top-color:#d0effa;
 }
 .fab-tooltip.visible{
   display:block;
@@ -864,8 +866,10 @@ main{
 </main>
 
 <!-- FAB -->
-<div class="fab-tooltip" id="fabTooltip">📖 よんだほんをきろくしてスタンプをもらおう</div>
-<button class="fab" onclick="openModal()">📖 ほんをきろくする ✨</button>
+<div class="fab-wrap">
+  <div class="fab-tooltip" id="fabTooltip">📖 よんだほんをきろくしてスタンプをもらおう</div>
+  <button class="fab" onclick="openModal()">📖 ほんをきろくする ✨</button>
+</div>
 
 <!-- ADD/EDIT MODAL -->
 <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
