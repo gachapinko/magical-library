@@ -1405,28 +1405,31 @@ function renderTrackAllDone() {
 }
 
 // 5冊達成アニメーション本体（終了後にcallback）
+// CSS classではなくWeb Animations APIを使用（モバイルSafari対応）
 function animateFullCompletion(callback) {
-  // 新規DOM要素が初回描画されるまで待ってからアニメーション開始（モバイル対策）
   requestAnimationFrame(() => requestAnimationFrame(() => {
     const wraps = Array.from(document.getElementById('bookTrack').querySelectorAll('.book-img-wrap'));
     const last = wraps[BOOK_GOAL - 1];
+
     // Step1: 5冊目を点灯
-    last.classList.add('book-activate');
-    setTimeout(() => {
-      last.classList.remove('book-activate');
-      // Step2: 全5冊グロー（rAFで確実に描画タイミングを合わせる）
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        wraps.forEach(w => {
-          w.classList.remove('book-full-glow');
-          void w.offsetWidth;
-          w.classList.add('book-full-glow');
-        });
-        setTimeout(() => {
-          wraps.forEach(w => w.classList.remove('book-full-glow'));
-          callback();
-        }, 1500);
-      }));
-    }, 1500);
+    last.animate([
+      { transform: 'scale(1)',    filter: 'brightness(1)' },
+      { transform: 'scale(1.15)', filter: 'brightness(1.6) drop-shadow(0 0 12px #ffd6ff)' },
+      { transform: 'scale(1)',    filter: 'brightness(1)' }
+    ], { duration: 1500, easing: 'ease' }).onfinish = () => {
+
+      // Step2: 全5冊グロー
+      let done = 0;
+      wraps.forEach(w => {
+        w.animate([
+          { transform: 'scale(1)',    filter: 'brightness(1)', offset: 0 },
+          { transform: 'scale(1.08)', filter: 'brightness(1.7) drop-shadow(0 0 10px #ffe7ff) drop-shadow(0 0 18px #ffd6ff)', offset: 0.4 },
+          { transform: 'scale(1)',    filter: 'brightness(1)', offset: 1 }
+        ], { duration: 1500, easing: 'ease' }).onfinish = () => {
+          if (++done === wraps.length) callback();
+        };
+      });
+    };
   }));
 }
 
