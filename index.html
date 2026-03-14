@@ -909,6 +909,20 @@ main{
       <button class="btn-export" onclick="exportBooks()">スプレッドシート用にコピー 📋</button>
       <div id="exportMsg" style="display:none;text-align:center;font-size:12px;font-weight:700;color:#0a8;margin-top:8px;">コピーしました！✨</div>
     </div>
+
+    <!-- リセット -->
+    <div style="margin-top:24px;border-top:1px solid rgba(200,125,232,0.08);padding-top:16px;text-align:center;">
+      <div id="resetStep1" >
+        <button onclick="showResetConfirm()" style="background:none;border:none;font-family:inherit;font-size:11px;font-weight:700;color:var(--text-lt);opacity:0.5;cursor:pointer;padding:4px 8px;">🗑 データをリセット</button>
+      </div>
+      <div id="resetStep2" style="display:none;">
+        <div style="font-size:11px;color:#c0392b;font-weight:700;margin-bottom:8px;">ほんとうに消しますか？もとにもどせません</div>
+        <div style="display:flex;gap:8px;justify-content:center;">
+          <button onclick="hideResetConfirm()" style="background:none;border:1px solid rgba(0,0,0,0.15);border-radius:999px;font-family:inherit;font-size:12px;font-weight:700;color:var(--text-sub);padding:6px 16px;cursor:pointer;">やめる</button>
+          <button onclick="resetData()" style="background:#e74c3c;border:none;border-radius:999px;font-family:inherit;font-size:12px;font-weight:700;color:white;padding:6px 16px;cursor:pointer;">消す</button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1479,7 +1493,7 @@ function openSettings() {
     setTimeout(() => document.getElementById('settingReward').focus(), 300);
   }
 }
-function closeSettings() { document.getElementById('settingsOverlay').classList.remove('open'); }
+function closeSettings() { document.getElementById('settingsOverlay').classList.remove('open'); hideResetConfirm(); }
 function closeSettingsOutside(e) { if (e.target.id === 'settingsOverlay') closeSettings(); }
 
 function initSettingAvatarPicker() {
@@ -1531,6 +1545,37 @@ function exportBooks() {
 // ===== INIT =====
 loadChildren();
 if (localStorage.getItem('ml_onboarding_reward')) showOnboardingTooltip();
+
+// ===== RESET =====
+function showResetConfirm() {
+  document.getElementById('resetStep1').style.display = 'none';
+  document.getElementById('resetStep2').style.display = '';
+}
+function hideResetConfirm() {
+  document.getElementById('resetStep2').style.display = 'none';
+  document.getElementById('resetStep1').style.display = '';
+}
+function resetData() {
+  const storage = loadStorage();
+  if (currentChild) {
+    delete storage.books[currentChild.id];
+    const idx = storage.children.findIndex(c => c.id === currentChild.id);
+    if (idx !== -1) {
+      storage.children[idx] = {
+        ...storage.children[idx],
+        stamp_count: 0, used_stamps: 0,
+        used_stamps_current: 0, used_stamps_round: 0,
+        total_books: 0, current_streak: 0, longest_streak: 0,
+        last_read_date: null,
+      };
+    }
+    saveStorage(storage);
+    books = [];
+    loadChild(storage.children[idx !== -1 ? idx : 0]);
+  }
+  hideResetConfirm();
+  closeSettings();
+}
 
 // ===== SWIPE TO DISMISS =====
 function initSwipeToDismiss(overlayId, closeFn) {
