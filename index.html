@@ -257,10 +257,20 @@ main{
   50% {transform:scale(1.2);}
   100%{transform:scale(1);}
 }
+@keyframes bookActivateFilter{
+  0%  {filter:brightness(1);}
+  50% {filter:brightness(1.6) drop-shadow(0 0 12px #ffd6ff);}
+  100%{filter:brightness(1);}
+}
 @keyframes fullCardGlow{
   0%  {transform:scale(1);}
   40% {transform:scale(1.12);}
   100%{transform:scale(1);}
+}
+@keyframes fullCardGlowFilter{
+  0%  {filter:brightness(1);}
+  40% {filter:brightness(1.7) drop-shadow(0 0 10px #ffe7ff) drop-shadow(0 0 18px #ffd6ff);}
+  100%{filter:brightness(1);}
 }
 .book-activate {animation:bookActivate 1.5s ease; transition:none!important;}
 .book-full-glow{animation:fullCardGlow 1.5s ease; transition:none!important; -webkit-animation:fullCardGlow 1.5s ease;}
@@ -1411,29 +1421,39 @@ function animateFullCompletion(callback) {
     const wraps = Array.from(document.getElementById('bookTrack').querySelectorAll('.book-img-wrap'));
     const last = wraps[BOOK_GOAL - 1];
 
-    // Step1: 5冊目を点灯（transition無効化してアニメーション）
+    // Step1: 5冊目を点灯（wrapper=transform, img=filter を別々に）
+    const lastImg = last.querySelector('img');
     last.style.transition = 'none';
     last.style.animation = 'none';
+    if (lastImg) { lastImg.style.transition = 'none'; lastImg.style.animation = 'none'; }
     requestAnimationFrame(() => {
       last.style.animation = 'bookActivate 1.5s ease';
+      if (lastImg) lastImg.style.animation = 'bookActivateFilter 1.5s ease';
 
       setTimeout(() => {
         last.style.animation = '';
         last.style.transition = '';
+        if (lastImg) { lastImg.style.animation = ''; lastImg.style.transition = ''; }
 
-        // Step2: 全5冊グロー（transition無効化してアニメーション）
+        // Step2: 全5冊グロー（wrapper=transform, img=filter を別々に）
         wraps.forEach(w => {
+          const img = w.querySelector('img');
           w.style.transition = 'none';
           w.style.animation = 'none';
+          if (img) { img.style.transition = 'none'; img.style.animation = 'none'; }
         });
         requestAnimationFrame(() => {
           wraps.forEach(w => {
+            const img = w.querySelector('img');
             w.style.animation = 'fullCardGlow 1.5s ease';
+            if (img) img.style.animation = 'fullCardGlowFilter 1.5s ease';
           });
           setTimeout(() => {
             wraps.forEach(w => {
+              const img = w.querySelector('img');
               w.style.animation = '';
               w.style.transition = '';
+              if (img) { img.style.animation = ''; img.style.transition = ''; }
             });
             callback();
           }, 1500);
