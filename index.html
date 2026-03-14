@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>✦ Magical Library ✨</title>
+<link rel="apple-touch-icon" href="assets/books/book1.png">
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&family=Dancing+Script:wght@700&family=Noto+Sans+JP:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -242,16 +243,18 @@ main{
 .stamp-title{font-weight:900;font-size:15px;color:var(--text);}
 .stamp-reward-preview{
   display:flex;align-items:center;gap:6px;
-  background:rgba(255,215,0,0.12);
-  border:1px solid rgba(255,215,0,0.3);
-  border-radius:12px;padding:4px 10px;
-  font-size:11px;font-weight:700;color:#a07000;
+  background:rgba(200,125,232,0.07);
+  border:1px solid rgba(200,125,232,0.18);
+  border-radius:999px;padding:4px 10px;
+  font-size:11px;font-weight:700;
+  color:var(--text-lt);
   white-space:normal;word-break:break-all;
 }
 
 /* スタンプグリッド */
 .stamp-grid{
   display:flex;gap:8px;flex-wrap:wrap;
+  justify-content:center;
   margin-bottom:0;
 }
 .stamp{
@@ -269,7 +272,24 @@ main{
 }
 
 /* まだ獲得していない */
-.stamp.empty{background:rgba(200,180,220,0.18);opacity:0.35;}
+.stamp.empty {
+  background: rgba(200,180,220,0.18);
+  opacity: 0.35;
+
+  /* 星型 */
+  clip-path: polygon(
+    50% 0%,
+    61% 35%,
+    98% 35%,
+    68% 57%,
+    79% 91%,
+    50% 70%,
+    21% 91%,
+    32% 57%,
+    2% 35%,
+    39% 35%
+  );
+}
 /* 使用済み（ごほうびで消費済み） */
 .stamp.used{
   background:rgba(180,170,190,0.2);
@@ -286,6 +306,69 @@ main{
   border:2px solid var(--bg);
 }
 
+/* ===== STAMP CONSUME ===== */
+.stamp-header-right{display:flex;align-items:stretch;gap:8px;}
+.star-badge{
+  display:flex;align-items:center;gap:4px;
+  background:rgba(200,125,232,0.07);
+  border:1px solid rgba(200,125,232,0.18);
+  border-radius:999px;padding:3px 9px 3px 5px;
+}
+.star-badge-img{width:16px;height:16px;object-fit:contain;opacity:0.6;}
+.star-badge-num{font-weight:700;font-size:12px;color:var(--text-lt);min-width:14px;text-align:center;}
+@keyframes badgePop{
+  0%{transform:scale(1);}50%{transform:scale(1.2);}100%{transform:scale(1);}
+}
+.star-badge.pop{animation:badgePop 0.25s var(--ease-spring) forwards;}
+
+/* consuming アニメーション */
+@keyframes checkPop{from{transform:scale(0);}to{transform:scale(1);}}
+.stamp.consuming::after{
+  content:'✓';position:absolute;bottom:-2px;right:-2px;
+  width:18px;height:18px;border-radius:50%;
+  background:var(--main-pink);color:white;
+  font-size:11px;font-weight:900;
+  display:flex;align-items:center;justify-content:center;
+  border:2px solid var(--bg);
+  animation:checkPop 0.15s var(--ease-spring) forwards;
+}
+@keyframes stampGlow{
+  0%{filter:brightness(1);}
+  50%{filter:brightness(1.6) drop-shadow(0 0 8px rgba(255,107,168,0.9));}
+  100%{filter:brightness(1);}
+}
+.stamp.glowing{animation:stampGlow 0.2s ease-out forwards;}
+
+/* 確認モーダル */
+.consume-modal-msg{
+  text-align:center;font-size:15px;color:var(--text-sub);
+  line-height:1.7;margin-bottom:10px;
+}
+.consume-modal-reward{
+  text-align:center;font-weight:700;font-size:14px;
+  color:#2a7aa0;
+  background:rgba(137,196,244,0.15);
+  border-radius:12px;padding:8px 14px;margin-bottom:20px;
+}
+.consume-modal-btns{display:flex;gap:10px;}
+.btn-consume-cancel{
+  flex:1;padding:13px;
+  border:2px solid rgba(200,125,232,0.3);border-radius:999px;
+  font-family:'M PLUS Rounded 1c',sans-serif;font-weight:700;font-size:14px;
+  color:var(--text-sub);background:transparent;cursor:pointer;
+}
+.btn-consume-ok{
+  flex:1;padding:13px;border:none;border-radius:999px;
+  font-family:'M PLUS Rounded 1c',sans-serif;font-weight:700;font-size:14px;
+  color:white;background:var(--grad-main);
+  box-shadow:0 4px 0 #a0459a;cursor:pointer;
+}
+
+/* 飛翔クローン */
+.stamp-fly-clone{
+  position:fixed;pointer-events:none;z-index:600;
+  width:48px;height:48px;
+}
 
 /* ===== STREAK ROW ===== */
 .streak-row{display:flex;gap:10px;}
@@ -384,7 +467,7 @@ main{
   transform:translateY(100%);
   transition:transform 0.4s var(--ease-out);
   box-shadow:0 -8px 40px rgba(200,125,232,0.25);
-  max-height:90vh;overflow-y:auto;
+  max-height:80vh;overflow-y:auto;
 }
 .modal-overlay.open .modal{transform:translateY(0);}
 .modal-handle{width:40px;height:4px;border-radius:2px;background:var(--text-lt);margin:0 auto 20px;display:block;}
@@ -409,10 +492,6 @@ main{
   box-shadow:0 0 0 3px rgba(255,107,168,0.12),inset 0 1px 0 rgba(255,255,255,0.8);
 }
 .form-textarea{resize:none;height:76px;}
-.form-rating{display:flex;gap:8px;}
-.rating-star{font-size:28px;cursor:pointer;opacity:0.25;transition:opacity 0.15s,transform 0.2s var(--ease-spring);}
-.rating-star.active{opacity:1;}
-.rating-star:hover{transform:scale(1.25);}
 .btn-submit{
   width:100%;margin-top:18px;
   background:var(--grad-main);color:white;
@@ -477,30 +556,6 @@ main{
   transition:transform 0.2s var(--ease-spring);
 }
 .btn-popup:hover{transform:scale(1.04);}
-
-/* ===== GOAL REACHED OVERLAY ===== */
-.goal-overlay{
-  position:fixed;inset:0;z-index:500;
-  background:rgba(74,46,74,0.55);backdrop-filter:blur(10px);
-  display:flex;align-items:center;justify-content:center;
-  opacity:0;pointer-events:none;transition:opacity 0.4s ease;
-}
-.goal-overlay.open{opacity:1;pointer-events:all;}
-.goal-popup{
-  background:linear-gradient(135deg,#FFF5F8,#F0E8FF);
-  border-radius:28px;padding:40px 28px;
-  text-align:center;max-width:320px;width:90%;
-  box-shadow:0 8px 0 rgba(200,125,232,0.35),0 24px 60px rgba(200,125,232,0.35);
-  transform:scale(0.6);
-  transition:transform 0.5s var(--ease-spring);
-  position:relative;overflow:hidden;
-}
-.goal-overlay.open .goal-popup{transform:scale(1);}
-.goal-popup::before{
-  content:'';position:absolute;top:4px;left:8px;right:8px;height:26%;
-  background:linear-gradient(180deg,rgba(255,255,255,0.5) 0%,transparent 100%);
-  border-radius:22px 22px 0 0;pointer-events:none;
-}
 
 /* confetti */
 .confetti-wrap{position:fixed;inset:0;pointer-events:none;z-index:490;}
@@ -620,7 +675,7 @@ main{
   <div class="nav-inner">
     <a href="#" class="nav-logo">✦ Magical Library ✦</a>
     <div class="nav-right">
-      <button class="nav-btn" title="設定" onclick="openSettings()"><img src="assets/setting/setting.png" style="width:50px;height:50px;object-fit:contain;"></button>
+      <button class="nav-btn" title="設定" onclick="openSettings()"><img src="assets/setting/setting.webp" style="width:50px;height:50px;object-fit:contain;"></button>
     </div>
   </div>
 </nav>
@@ -629,10 +684,6 @@ main{
 
   <!-- HERO: 5冊ゴール -->
   <div class="hero-card reveal">
-    <div class="hero-deco" style="top:10px;right:16px;font-size:36px;animation-duration:4s">⭐</div>
-    <div class="hero-deco" style="bottom:20px;right:20px;font-size:28px;animation-duration:3.2s;animation-delay:-1s">💎</div>
-    <div class="hero-deco" style="bottom:16px;left:14px;font-size:22px;animation-duration:5s;animation-delay:-2s">🌸</div>
-
     <div class="hero-top">
       <div class="child-avatar-big" id="heroAvatar">🌸</div>
       <div>
@@ -653,26 +704,31 @@ main{
   <div class="stamp-card reveal" style="transition-delay:0.06s">
     <div class="stamp-header">
       <div class="stamp-title">🎖 スタンプカード</div>
-      <div class="stamp-reward-preview" id="rewardPreview">🎁 アイス！</div>
+      <div class="stamp-header-right">
+        <div class="star-badge" id="starBadge">
+          <img class="star-badge-img" id="starBadgeImg" src="assets/stamps/star.webp" alt="">
+          <span class="star-badge-num" id="starBadgeNum">0</span>
+        </div>
+        <div class="stamp-reward-preview" id="rewardPreview">🎁 スタンプ1こでアイス！</div>
+      </div>
     </div>
     <div class="stamp-grid" id="stampGrid"></div>
-    <div id="usedRoundsBadge" style="display:none;margin-top:8px;font-size:11px;font-weight:700;color:var(--text-lt);letter-spacing:0.06em;text-align:center;padding:4px 12px;background:rgba(180,160,200,0.12);border-radius:999px;"></div>
   </div>
 
   <!-- STREAK -->
   <div class="streak-row reveal" style="transition-delay:0.12s">
     <div class="streak-card">
-      <img class="streak-emoji" src="assets/badge/1.PNG" alt="">
+      <img class="streak-emoji" src="assets/badge/1.webp" alt="">
       <div class="streak-num" id="currentStreakNum">0<span>にち</span></div>
       <div class="streak-label">れんぞくきろく</div>
     </div>
     <div class="streak-card">
-      <img class="streak-emoji" src="assets/badge/2.PNG" alt="">
+      <img class="streak-emoji" src="assets/badge/2.webp" alt="">
       <div class="streak-num" id="longestStreakNum">0<span>にち</span></div>
       <div class="streak-label">さいこうきろく</div>
     </div>
     <div class="streak-card">
-      <img class="streak-emoji" src="assets/badge/3.PNG" alt="">
+      <img class="streak-emoji" src="assets/badge/3.webp" alt="">
       <div class="streak-num" id="totalBooksNum">13<span>さつ</span></div>
       <div class="streak-label">ぜんぶで</div>
     </div>
@@ -711,17 +767,21 @@ main{
       <label class="form-label">かんそう ♡</label>
       <textarea class="form-textarea" id="inputImpression" placeholder="たのしかった！どきどきした！"></textarea>
     </div>
-    <div class="form-group">
-      <label class="form-label">どのくらいよかった？</label>
-      <div class="form-rating" id="ratingStars">
-        <span class="rating-star" data-v="1">⭐</span>
-        <span class="rating-star" data-v="2">⭐</span>
-        <span class="rating-star" data-v="3">⭐</span>
-        <span class="rating-star" data-v="4">⭐</span>
-        <span class="rating-star" data-v="5">⭐</span>
-      </div>
-    </div>
     <button class="btn-submit" id="submitBtn" onclick="submitBook()">よんだよ！おぼえておいてね 🌟</button>
+  </div>
+</div>
+
+<!-- STAMP CONSUME CONFIRM MODAL -->
+<div class="modal-overlay" id="consumeOverlay" onclick="closeConsumeOutside(event)">
+  <div class="modal" style="padding-bottom:32px;">
+    <span class="modal-handle"></span>
+    <div class="modal-title">⭐ スタンプをつかう？</div>
+    <p class="consume-modal-msg">このスタンプをつかって<br>ごほうびをもらいますか？</p>
+    <p class="consume-modal-reward" id="consumeRewardLabel"></p>
+    <div class="consume-modal-btns">
+      <button class="btn-consume-cancel" onclick="closeConsumeModal()">やめる</button>
+      <button class="btn-consume-ok" onclick="confirmConsumeStamp()">つかう ✨</button>
+    </div>
   </div>
 </div>
 
@@ -773,19 +833,6 @@ main{
   </div>
 </div>
 
-<!-- GOAL REACHED OVERLAY -->
-<div class="goal-overlay" id="goalOverlay">
-  <div class="goal-popup">
-    <span class="popup-emoji" style="font-size:80px;display:block;margin-bottom:10px;animation:popBounce 0.6s var(--ease-spring) 0.2s both">🎉</span>
-    <div class="popup-title">ごほうびゲット！！</div>
-    <div class="popup-sub" id="goalPopupSub">スタンプが全部たまったよ！<br>やったー！！ 🎀</div>
-    <div class="popup-reward" id="goalRewardBox">
-      <div class="popup-reward-label">🎁 ごほうびはこれ！</div>
-      <div id="goalRewardMemo">スタンプ1個でお菓子</div>
-    </div>
-    <button class="btn-popup" onclick="closeGoalOverlay()">ありがとう！✨</button>
-  </div>
-</div>
 
 <script>
 // ===== STORAGE =====
@@ -796,29 +843,37 @@ function loadStorage() {
 }
 function saveStorage(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
 
-const STAMP_STAR = "assets/stamps/star.png";
+const STAMP_STAR = "assets/stamps/star.webp";
 const BOOK_IMGS = [
-  "assets/books/book1.png","assets/books/book2.png","assets/books/book3.png",
-  "assets/books/book4.png","assets/books/book5.png",
+  "assets/books/book1.webp","assets/books/book2.webp","assets/books/book3.webp",
+  "assets/books/book4.webp","assets/books/book5.webp",
 ];
 const BOOK_GOAL = 5;
-const AVATARS = ['🌸','🌟','🐰','🦄','🌈','🍀','🦋','🌙','🎀','⭐','🚀','🐻','😺','🐶','🚗'];
+const AVATARS = ['🌙','⭐️','💎','🔮','🎀','👑','👗','🪽','📖','🍭','🐈','🐰','🦄','🦋'];
 
 // ===== STATE =====
 let currentChild = null;
 let allChildren = [];
 let books = [];
 let STAMP_GOAL = 5;
+const STAMP_DISPLAY = 6;
 let REWARD_MEMO = '';
 let editingId = null;
-let currentRating = 0;
-let selectedAvatar = '🌸';
+let selectedAvatar = '🌙';
+let stampConsuming = false;
+let pendingConsumeStampEl = null;
 
 // ===== COMPUTED =====
 function getTotalBooks()   { return currentChild ? currentChild.total_books : 0; }
 function getProgress()     { return getTotalBooks() % BOOK_GOAL; }
 function getStampCount()   { return currentChild ? currentChild.stamp_count : 0; }
-function getStampProgress(){ return getStampCount() % STAMP_GOAL; }
+function getStampProgress(){
+  const sc = getStampCount();
+  const currentRound = Math.floor(sc / STAMP_GOAL);
+  const usedInRound = (currentChild?.used_stamps_round === currentRound)
+    ? (currentChild?.used_stamps_current ?? 0) : 0;
+  return Math.max(0, sc % STAMP_GOAL - usedInRound);
+}
 
 // ===== CHILD SETUP =====
 function initAvatarPicker() {
@@ -851,6 +906,9 @@ function createChild() {
     current_streak: 0,
     longest_streak: 0,
     last_read_date: null,
+    used_stamps: 0,
+    used_stamps_current: 0,
+    used_stamps_round: 0,
   };
   const storage = loadStorage();
   storage.children.push(child);
@@ -892,11 +950,16 @@ function renderChildInfo() {
   document.getElementById('longestStreakNum').innerHTML = `${c.longest_streak}<span>にち</span>`;
 }
 function getTitle(total) {
-  if (total >= 30) return '⭐ レベル5 ／ でんせつの読み手';
-  if (total >= 20) return '⭐ レベル4 ／ ほんのまじょ';
-  if (total >= 10) return '⭐ レベル3 ／ まほうよみ';
-  if (total >= 5)  return '⭐ レベル2 ／ ほしよみ師';
-  return '⭐ レベル1 ／ よみはじめ';
+  if (total >= 300) return '⭐ レベル10 ／ えいえんの書の大魔導士'; 
+  if (total >= 200) return '⭐ レベル9 ／ ぎんが図書館の賢者'; 
+  if (total >= 150) return '⭐ レベル8 ／ 月の書の守り手'; 
+  if (total >= 100) return '⭐ レベル7 ／ 星の書の読み手'; 
+  if (total >= 50) return '⭐ レベル6 ／ まほう図書館の司書';
+  if (total >= 30) return '⭐ レベル5 ／ でんせつの書の読み手'; 
+  if (total >= 20) return '⭐ レベル4 ／ ほんのまじょ'; 
+  if (total >= 10) return '⭐ レベル3 ／ まほうよみ'; 
+  if (total >= 5) return '⭐ レベル2 ／ ほしよみ師';  
+  return '⭐ レベル1 ／ みならい読書家';
 }
 function switchChild() {
   if (allChildren.length < 2) return;
@@ -933,17 +996,15 @@ function renderTrack() {
 
 // ===== RENDER: STAMP CARD =====
 function renderStampCard() {
-  const totalStamps = getStampCount();
-  const prog        = getStampProgress();         // 現在周回の獲得数
-  const usedRounds  = Math.floor(totalStamps / STAMP_GOAL); // 消費済みごほうび回数
-  const grid        = document.getElementById('stampGrid');
-  grid.innerHTML    = '';
+  const prog = getStampProgress();
+  const grid = document.getElementById('stampGrid');
+  grid.innerHTML = '';
 
-  // ① 使用済みスタンプ（過去の周回分）をグレーアウトで先に表示（最大STAMP_GOAL個）
-  // ② 現在周回のスタンプを表示
-  // シンプル実装: グリッドはSTAMP_GOAL個固定。
-  // 過去に消費があれば「使用済みN回」バッジを別途表示
-  for (let i = 0; i < STAMP_GOAL; i++) {
+  // 累計スター数バッジ更新
+  document.getElementById('starBadgeNum').textContent = currentChild?.used_stamps ?? 0;
+
+  const displayCount = Math.max(STAMP_GOAL, STAMP_DISPLAY);
+  for (let i = 0; i < displayCount; i++) {
     const earned = i < prog;
     const el = document.createElement('div');
     el.className = 'stamp ' + (earned ? 'earned' : 'empty');
@@ -952,20 +1013,9 @@ function renderStampCard() {
       img.src = STAMP_STAR;
       img.style.cssText = 'width:100%;height:100%;object-fit:contain;pointer-events:none;';
       el.appendChild(img);
-    } else {
-      el.textContent = '';
+      el.onclick = () => { if (!stampConsuming) openConsumeModal(el); };
     }
-    el.onclick = () => { el.style.transform='scale(1.4) rotate(15deg)'; setTimeout(()=>el.style.transform='',400); };
     grid.appendChild(el);
-  }
-
-  // 使用済みバッジ表示
-  const usedBadge = document.getElementById('usedRoundsBadge');
-  if (usedRounds > 0) {
-    usedBadge.textContent = `✦ ごほうびゲット済み ${usedRounds}回`;
-    usedBadge.style.display = 'inline-block';
-  } else {
-    usedBadge.style.display = 'none';
   }
 
   document.getElementById('rewardPreview').textContent = `🎁 ${REWARD_MEMO}`;
@@ -988,12 +1038,11 @@ function renderBooks() {
   const reversed = [...books].reverse();
   const display  = showAllBooks ? reversed : reversed.slice(0, BOOKS_PREVIEW);
   list.innerHTML = display.map((b,i) => {
-    const stars = '⭐'.repeat(b.rating) + '☆'.repeat(5-b.rating);
     return `
     <div class="book-list-item" style="transition-delay:${i*0.04}s">
       <div class="book-meta">
         <div class="book-title-text">${b.title}</div>
-        <div class="book-author-text">${b.author}　${stars}</div>
+        <div class="book-author-text">${b.author}</div>
         ${b.impression ? `<div class="book-impression">「${b.impression}」</div>` : ''}
       </div>
       <div class="book-actions">
@@ -1024,26 +1073,16 @@ function renderAll() { renderTrack(); renderStampCard(); renderBooks(); }
 // ===== MODAL =====
 function openModal(prefill) {
   editingId = prefill?.id || null;
-  currentRating = prefill?.rating || 0;
   document.getElementById('inputTitle').value      = prefill?.title || '';
   document.getElementById('inputAuthor').value     = prefill?.author || '';
   document.getElementById('inputImpression').value = prefill?.impression || '';
   document.getElementById('modalTitle').textContent = editingId ? 'ほんをなおす ✏️' : 'ほんをきろくする 📖';
   document.getElementById('submitBtn').textContent  = editingId ? 'なおしたよ！✨' : 'よんだよ！おぼえておいてね 🌟';
-  updateStars();
   document.getElementById('modalOverlay').classList.add('open');
   setTimeout(() => document.getElementById('inputTitle').focus(), 400);
 }
 function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
 function closeModalOutside(e) { if (e.target.id==='modalOverlay') closeModal(); }
-
-document.getElementById('ratingStars').addEventListener('click', e => {
-  const s = e.target.closest('.rating-star');
-  if (s) { currentRating = +s.dataset.v; updateStars(); }
-});
-function updateStars() {
-  document.querySelectorAll('.rating-star').forEach(s => s.classList.toggle('active', +s.dataset.v <= currentRating));
-}
 
 // ===== SUBMIT =====
 function submitBook() {
@@ -1051,17 +1090,16 @@ function submitBook() {
   if (!title) { document.getElementById('inputTitle').focus(); return; }
   const author     = document.getElementById('inputAuthor').value.trim();
   const impression = document.getElementById('inputImpression').value.trim();
-  const rating     = currentRating || 3;
   const prevStamps = getStampCount();
   const storage = loadStorage();
 
   if (editingId) {
     const idx = books.findIndex(b => b.id === editingId);
-    if (idx !== -1) books[idx] = { ...books[idx], title, author, impression, rating };
+    if (idx !== -1) books[idx] = { ...books[idx], title, author, impression };
     storage.books[currentChild.id] = books;
     saveStorage(storage);
   } else {
-    const book = { id: Date.now().toString(), child_id: currentChild.id, title, author, impression, rating };
+    const book = { id: Date.now().toString(), child_id: currentChild.id, title, author, impression };
     books.push(book);
     storage.books[currentChild.id] = books;
     saveStorage(storage);
@@ -1095,6 +1133,100 @@ function updateChildStats(prevStamps, storage) {
   }
 }
 
+// ===== STAMP CONSUME =====
+function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function openConsumeModal(stampEl) {
+  pendingConsumeStampEl = stampEl;
+  document.getElementById('consumeRewardLabel').textContent = `🎁 ${REWARD_MEMO}`;
+  document.getElementById('consumeOverlay').classList.add('open');
+}
+function closeConsumeModal() {
+  pendingConsumeStampEl = null;
+  document.getElementById('consumeOverlay').classList.remove('open');
+}
+function closeConsumeOutside(e) { if (e.target.id === 'consumeOverlay') closeConsumeModal(); }
+function confirmConsumeStamp() {
+  document.getElementById('consumeOverlay').classList.remove('open');
+  const el = pendingConsumeStampEl;
+  pendingConsumeStampEl = null;
+  if (el) consumeStamp(el);
+}
+
+async function consumeStamp(stampEl) {
+  stampConsuming = true;
+
+  // 1. チェックマーク
+  stampEl.classList.add('consuming');
+  await wait(150);
+
+  // 2. 発光
+  stampEl.classList.add('glowing');
+  await wait(200);
+  stampEl.classList.remove('glowing');
+
+  // 3. 縮小
+  stampEl.style.transition = 'transform 0.18s ease-in-out, opacity 0.18s ease';
+  stampEl.style.transform = 'scale(0.72) translateY(-3px)';
+  await wait(180);
+
+  // 4. 飛翔クローン作成
+  const srcRect = stampEl.getBoundingClientRect();
+  const badgeImg = document.getElementById('starBadgeImg');
+  const dstRect = badgeImg.getBoundingClientRect();
+
+  const clone = document.createElement('img');
+  clone.className = 'stamp-fly-clone';
+  clone.src = STAMP_STAR;
+  clone.style.cssText = `left:${srcRect.left + srcRect.width/2 - 24}px;top:${srcRect.top + srcRect.height/2 - 24}px;transform:scale(0.72);`;
+  document.body.appendChild(clone);
+  stampEl.style.opacity = '0';
+
+  const dx = (dstRect.left + dstRect.width/2 - 8) - (srcRect.left + srcRect.width/2 - 24);
+  const dy = (dstRect.top + dstRect.height/2 - 8) - (srcRect.top + srcRect.height/2 - 24);
+
+  // 弧を描いて飛ぶ（ネストした2要素でX/Yを別々にアニメーション）
+  clone.animate([
+    { transform: 'scale(0.72) translate(0px, 0px)', opacity: 1 },
+    { transform: `scale(0.55) translate(${dx*0.5}px, ${dy*0.5 - 38}px)`, opacity: 1 },
+    { transform: `scale(0.38) translate(${dx}px, ${dy}px)`, opacity: 0.8 },
+  ], { duration: 460, easing: 'cubic-bezier(0.4,0,0.2,1)', fill: 'forwards' });
+
+  await wait(420);
+
+  // 5. 累計スター +1
+  const sc = getStampCount();
+  const round = Math.floor(sc / STAMP_GOAL);
+  const prevUsedCurrent = (currentChild.used_stamps_round === round)
+    ? (currentChild.used_stamps_current ?? 0) : 0;
+  const newUsedStamps = (currentChild.used_stamps ?? 0) + 1;
+  currentChild = {
+    ...currentChild,
+    used_stamps: newUsedStamps,
+    used_stamps_current: prevUsedCurrent + 1,
+    used_stamps_round: round,
+  };
+  const storage = loadStorage();
+  const idx = storage.children.findIndex(c => c.id === currentChild.id);
+  if (idx !== -1) storage.children[idx] = currentChild;
+  allChildren = storage.children;
+  saveStorage(storage);
+
+  document.getElementById('starBadgeNum').textContent = newUsedStamps;
+  const badge = document.getElementById('starBadge');
+  badge.classList.remove('pop');
+  void badge.offsetWidth;
+  badge.classList.add('pop');
+
+  await wait(60);
+  clone.remove();
+
+  // 6. スタンプ枠を empty に戻す
+  await wait(180);
+  renderStampCard();
+  stampConsuming = false;
+}
+
 // ===== EDIT =====
 function editBook(id, e) {
   e.stopPropagation();
@@ -1104,36 +1236,15 @@ function editBook(id, e) {
 
 // ===== STAMP GET =====
 function showStampGet(stamps) {
-  const prog = stamps % STAMP_GOAL;
   const name = currentChild ? currentChild.name : '';
-  document.getElementById('stampPopupSub').innerHTML = `5さつよみきったよ！<br>すごい！${name} ✨`;
+  document.getElementById('stampPopupSub').innerHTML = `5さつよみきったよ！<br>すごい！${name}さん ✨`;
   document.getElementById('stampRewardMemo').textContent = REWARD_MEMO;
   document.getElementById('stampOverlay').classList.add('open');
   launchConfetti(40);
-  // ごほうび達成チェック
-  if (prog === 0) {
-    setTimeout(() => {
-      document.getElementById('stampOverlay').classList.remove('open');
-      showGoalReached();
-    }, 3000);
-  }
 }
 function closeStampOverlay() {
   document.getElementById('stampOverlay').classList.remove('open');
   document.getElementById('confettiWrap').innerHTML = '';
-}
-
-// ===== GOAL REACHED =====
-function showGoalReached() {
-  document.getElementById('goalRewardMemo').textContent = REWARD_MEMO;
-  document.getElementById('goalPopupSub').innerHTML = `スタンプが${STAMP_GOAL}こ全部たまったよ！<br>やったー！！ 🎉`;
-  document.getElementById('goalOverlay').classList.add('open');
-  launchConfetti(70);
-}
-function closeGoalOverlay() {
-  document.getElementById('goalOverlay').classList.remove('open');
-  document.getElementById('confettiWrap').innerHTML = '';
-  // スタンプリセット（extraStampsはそのまま積み上げる実装）
 }
 
 // ===== CONFETTI =====
@@ -1152,7 +1263,7 @@ function launchConfetti(n) {
 
 
 // ===== PARTICLES =====
-const emojis = ['✦','⭐','💎','🌸','✨','🎀','💫','🌟'];
+const emojis = ['✦','✨'];
 const pWrap = document.getElementById('particles');
 for (let i=0;i<16;i++) {
   const p = document.createElement('div');
@@ -1165,7 +1276,7 @@ for (let i=0;i<16;i++) {
 // ===== CLICK SPARKLE =====
 document.addEventListener('click', e => {
   const spark = document.createElement('div');
-  spark.textContent = ['✨','🌟','⭐','💫'][Math.floor(Math.random()*4)];
+  spark.textContent = ['✨','🪄','💫'][Math.floor(Math.random()*4)];
   spark.style.cssText = `position:fixed;pointer-events:none;z-index:9999;left:${e.clientX}px;top:${e.clientY}px;font-size:16px;transform:translate(-50%,-50%);animation:sparkleClick 0.6s ease-out forwards;`;
   document.body.appendChild(spark);
   setTimeout(()=>spark.remove(),600);
@@ -1181,7 +1292,7 @@ const obs = new IntersectionObserver(entries => {
 document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 
 // ===== SETTINGS =====
-let selectedSettingAvatar = '🌸';
+let selectedSettingAvatar = '🌙';
 
 function openSettings() {
   if (!currentChild) return;
