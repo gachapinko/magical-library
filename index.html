@@ -515,7 +515,8 @@ main{
 .book-meta{flex:1;min-width:0;}
 .book-title-text{font-weight:900;font-size:14px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:1px;}
 .book-author-text{font-size:11px;font-weight:700;color:var(--text-lt);}
-.book-impression{font-size:12px;font-weight:700;color:var(--text-sub);margin-top:3px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;}
+.book-impression{font-size:12px;font-weight:700;color:var(--text-sub);margin-top:3px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;cursor:pointer;}
+.book-impression.expanded{display:block;overflow:visible;cursor:pointer;}
 .book-actions{display:flex;flex-direction:column;gap:4px;flex-shrink:0;}
 .book-action-btn{
   width:28px;height:28px;border-radius:50%;border:none;cursor:pointer;
@@ -1278,7 +1279,7 @@ function renderBooks() {
       <div class="book-meta">
         <div class="book-title-text">${b.title}</div>
         <div class="book-author-text">${b.author}</div>
-        ${b.impression ? `<div class="book-impression">「${b.impression}」</div>` : ''}
+        ${b.impression ? `<div class="book-impression" onclick="this.classList.toggle('expanded')">「${b.impression}」</div>` : ''}
       </div>
       <div class="book-actions">
         <button class="book-action-btn btn-edit"   onclick="editBook('${b.id}',event)">✏️</button>
